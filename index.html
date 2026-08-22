@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FCFBF9">
+<title>Карта сети · Найдите свой город · ОХВАТ</title>
+<meta name="description" content="Интерактивная карта сети мастеров. Найдите город и услугу — узнайте, свободен ли слот, и подайте заявку.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+
+<style>
+/* ==========================================================
+   ТОКЕНЫ
+   ========================================================== */
+:root{
+  --paper:#FCFBF9;
+  --vellum:#F4F0E9;
+  --card:#FFFDFA;
+  --ink:#14110E;
+  --ink-2:#3A342D;
+  --slate:#7A7267;
+  --rule:#E4DDD2;
+  --rule-2:#CFC6B8;
+
+  --lime:#DCF24B;
+  --lime-ink:#14110E;
+
+  --open:#1F6B54;  --open-wash:#E9F1ED;
+  --soon:#A06B18;  --soon-wash:#F6EFE1;
+  --taken:#8A8177; --taken-wash:#F0ECE5;
+
+  --panel-w:400px;
+  --top-h:64px;
+  --r-card:20px;
+
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sans:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --display:"Instrument Sans",system-ui,-apple-system,sans-serif;
+  --serif:"Instrument Sans",system-ui,sans-serif;
+
+  --shadow:0 30px 70px -34px rgba(20,17,14,.55), 0 4px 14px -8px rgba(20,17,14,.18);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body.locked{overflow:hidden}
+body::after{content:"";position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.045;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+.eyebrow{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--slate)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:6px}
+
+.btn{border:1px solid var(--ink);background:transparent;padding:10px 18px;border-radius:999px;cursor:pointer;
+  font-size:13px;font-weight:500;transition:background .18s,color .18s,transform .12s,border-color .18s}
+.btn:hover{background:var(--ink);color:var(--paper)}
+.btn:active{transform:translateY(1px)}
+.btn-ink{background:var(--ink);color:var(--paper)}
+.btn-ink:hover{background:#000}
+.btn-lime{background:var(--lime);border-color:var(--lime);color:var(--lime-ink);
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:13px 18px}
+.btn-lime:hover{background:#D2EA35;border-color:#D2EA35;color:var(--lime-ink)}
+.btn-ghost{border-color:var(--rule-2);color:var(--ink-2)}
+.btn-ghost:hover{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.btn-block{display:block;width:100%;text-align:center}
+
+/* ==========================================================
+   ШАПКА
+   ========================================================== */
+.topbar{height:var(--top-h);display:flex;align-items:center;gap:24px;padding:0 20px;border-bottom:1px solid var(--rule);background:var(--paper);position:relative;z-index:600}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.brand-mark{font-family:var(--serif);font-weight:400;font-size:22px;letter-spacing:.02em}
+.brand-dot{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 1px rgba(20,17,14,.25)}
+.brand-sub{color:var(--slate);font-size:11px;letter-spacing:.06em}
+.topnav{display:flex;gap:8px}
+.topnav a{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);
+  text-decoration:none;padding:8px 13px;border-radius:999px;border:1px solid transparent}
+.topnav a:hover{border-color:var(--rule-2);background:var(--vellum)}
+.topnav a.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+/* ==========================================================
+   СЦЕНА
+   ========================================================== */
+.stage{display:grid;grid-template-columns:var(--panel-w) 1fr;height:calc(100svh - var(--top-h));min-height:540px}
+
+.panel{border-right:1px solid var(--rule);background:var(--paper);display:flex;flex-direction:column;min-height:0;position:relative;z-index:500}
+.panel-head{padding:22px 22px 16px;border-bottom:1px solid var(--rule)}
+.panel-title{font-family:var(--serif);font-weight:300;font-size:29px;line-height:1.12;margin:10px 0 8px;letter-spacing:-.01em}
+.panel-title em{font-style:italic}
+.panel-lede{color:var(--slate);font-size:13.5px;margin:0 0 16px}
+
+.search{position:relative}
+.search-field{display:flex;align-items:center;gap:10px;border:1px solid var(--ink);border-radius:999px;background:var(--card);padding:0 6px 0 16px;height:48px;transition:box-shadow .18s}
+.search-field:focus-within{box-shadow:0 0 0 3px rgba(20,17,14,.09)}
+.search-field svg{flex:none;opacity:.75}
+#q{flex:1;border:0;background:transparent;outline:none;font-family:var(--sans);font-size:14.5px;color:var(--ink);min-width:0}
+#q::placeholder{color:#A79E92}
+.search-go{flex:none;border:0;background:var(--ink);color:var(--paper);height:36px;padding:0 16px;border-radius:999px;cursor:pointer;
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.svc-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+.svc-row label{flex:none}
+#svc{flex:1;border:1px solid var(--rule-2);border-radius:999px;background:var(--card);padding:9px 13px;font-family:var(--sans);font-size:13.5px;color:var(--ink);outline:none}
+#svc:focus{border-color:var(--ink)}
+.search-hint{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--rule-2);background:transparent;border-radius:999px;padding:5px 12px;font-size:11.5px;color:var(--ink-2);cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--ink);background:var(--vellum)}
+
+.suggest{position:absolute;left:0;right:0;top:54px;z-index:20;background:var(--card);border:1px solid var(--ink);border-radius:16px;
+  box-shadow:var(--shadow);max-height:290px;overflow:auto;display:none}
+.suggest.on{display:block}
+.suggest-item{display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;border:0;background:transparent;cursor:pointer;text-align:left;border-bottom:1px solid var(--rule)}
+.suggest-item:last-child{border-bottom:0}
+.suggest-item:hover{background:var(--vellum)}
+.suggest-name{font-size:14px}
+.suggest-meta{margin-left:auto;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate)}
+.sug-group{padding:10px 14px 6px;border-bottom:1px solid var(--rule);background:var(--vellum)}
+.suggest-item.addr{align-items:flex-start}
+.suggest-item.addr svg{margin-top:3px;flex:none;color:var(--slate)}
+.suggest-sub{font-size:11.5px;color:var(--slate)}
+.pick{width:16px;height:16px;border-radius:50%;background:var(--lime);
+  box-shadow:0 0 0 3px var(--paper),0 0 0 4.5px var(--ink),0 8px 18px -8px rgba(20,17,14,.7)}
+
+.panel-body{flex:1;overflow-y:auto;overscroll-behavior:contain;min-height:0}
+.panel-foot{border-top:1px solid var(--rule);padding:12px 22px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+
+.pad{padding:20px 22px}
+.sect-label{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.sect-label::after{content:"";flex:1;height:1px;background:var(--rule)}
+
+.dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 0 3px var(--paper)}
+.dot.live{background:var(--open)}
+.dot.soon{background:transparent;border:2px solid var(--soon)}
+
+.tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:5px 10px;border-radius:999px;white-space:nowrap}
+.tag.free{background:var(--open-wash);color:var(--open)}
+.tag.soon{background:var(--soon-wash);color:var(--soon)}
+.tag.busy{background:var(--taken-wash);color:#6B6459}
+.tag.none{background:var(--vellum);color:var(--slate)}
+.tag.plain{background:var(--vellum);color:var(--ink-2)}
+
+.idle-row{display:flex;align-items:center;gap:12px;width:100%;padding:11px 22px;border:0;background:transparent;cursor:pointer;text-align:left;border-bottom:1px solid var(--rule)}
+.idle-row:hover{background:var(--vellum)}
+.idle-city{font-size:14.5px}
+.idle-country{font-size:12px;color:var(--slate)}
+.idle-status{margin-left:auto}
+
+.result-head{padding:22px;border-bottom:1px solid var(--rule)}
+.result-city{font-family:var(--serif);font-weight:300;font-size:34px;line-height:1.06;margin:12px 0 4px;letter-spacing:-.015em}
+.result-sub{color:var(--slate);font-size:13px;margin:0}
+.verdict{margin:18px 0 0;padding:16px;border-radius:16px;border:1px solid var(--rule);background:var(--card)}
+.verdict.free{border-color:#C3DACF;background:var(--open-wash)}
+.verdict.soon{border-color:#E4D2AE;background:var(--soon-wash)}
+.verdict.busy{border-color:var(--rule-2);background:var(--taken-wash)}
+.verdict h3{font-family:var(--serif);font-weight:400;font-size:19px;margin:10px 0 6px}
+.verdict p{margin:0;font-size:13.5px;color:var(--ink-2)}
+
+.facts{border-top:1px solid var(--rule);margin:0}
+.fact{display:flex;justify-content:space-between;gap:14px;align-items:baseline;padding:11px 22px;border-bottom:1px solid var(--rule)}
+.fact dt{color:var(--slate);font-size:12.5px;margin:0}
+.fact dd{margin:0;font-size:13.5px;text-align:right}
+
+.mrow{display:flex;align-items:center;gap:12px;width:100%;padding:10px 22px;border:0;background:transparent;cursor:pointer;text-align:left;border-bottom:1px solid var(--rule)}
+.mrow:hover{background:var(--vellum)}
+.mrow .av{width:38px;height:38px;font-size:12px}
+.mrow-name{font-size:14px}
+.mrow-svc{font-size:11.5px;color:var(--slate)}
+.mrow-go{margin-left:auto;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate)}
+
+/* ==========================================================
+   АВАТАРЫ
+   ========================================================== */
+.av{border-radius:50%;overflow:hidden;position:relative;display:grid;place-items:center;flex:none;
+  font-family:var(--mono);font-weight:500;color:#F4F1EA;background:#2A2622}
+.av img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05)}
+.av::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 30% 15%,rgba(255,255,255,.22),transparent 60%)}
+.av span{position:relative;z-index:1}
+
+/* ==========================================================
+   КАРТА
+   ========================================================== */
+.map-wrap{position:relative;background:var(--paper);min-height:0}
+#map{position:absolute;inset:0;background:var(--paper)}
+.leaflet-container{background:var(--paper);font-family:var(--sans)}
+.leaflet-tile-pane{filter:sepia(.30) saturate(.72) brightness(1.05) contrast(.90) hue-rotate(-6deg)}
+.leaflet-control-attribution{background:rgba(252,251,249,.86)!important;font-family:var(--mono);font-size:9px!important;color:var(--slate)!important;padding:2px 8px!important}
+.leaflet-control-attribution a{color:var(--ink-2)!important}
+
+.reticle{position:absolute;left:50%;top:50%;width:118px;height:118px;transform:translate(-50%,-50%);pointer-events:none;z-index:410;opacity:.45;transition:opacity .3s,transform .3s}
+.reticle.hot{opacity:1;transform:translate(-50%,-50%) scale(1.06)}
+.reticle span{position:absolute;background:var(--ink)}
+.reticle .h{left:0;right:0;top:50%;height:1px;opacity:.28}
+.reticle .v{top:0;bottom:0;left:50%;width:1px;opacity:.28}
+.reticle .b{width:9px;height:9px;border:1px solid var(--ink);background:transparent;left:50%;top:50%;transform:translate(-50%,-50%) rotate(45deg);opacity:.6}
+
+.readout{position:absolute;left:16px;bottom:16px;z-index:420;background:rgba(252,251,249,.9);backdrop-filter:blur(6px);
+  border:1px solid var(--rule);border-radius:999px;padding:9px 15px;display:flex;gap:14px;align-items:center;
+  font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--ink-2)}
+.readout b{font-weight:500;color:var(--slate);letter-spacing:.14em;font-size:9px}
+
+.legend{position:absolute;right:16px;top:16px;z-index:420;background:rgba(252,251,249,.9);backdrop-filter:blur(6px);
+  border:1px solid var(--rule);border-radius:16px;padding:12px 14px}
+.legend-row{display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--ink-2)}
+.legend-row+.legend-row{margin-top:8px}
+.legend-n{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--slate)}
+.legend-av{width:14px;height:14px;border-radius:50%;background:#2A2622;box-shadow:0 0 0 2px var(--paper);flex:none}
+
+.zoomer{position:absolute;right:16px;bottom:52px;z-index:420;display:flex;flex-direction:column;gap:6px}
+.zoomer button{width:38px;height:38px;border:1px solid var(--rule);border-radius:50%;background:rgba(252,251,249,.94);backdrop-filter:blur(6px);cursor:pointer;font-size:17px;line-height:1}
+.zoomer button:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+.pin{position:relative}
+.pin-dot{width:11px;height:11px;border-radius:50%;box-shadow:0 0 0 3px rgba(252,251,249,.95);transition:transform .18s}
+.pin:hover .pin-dot{transform:scale(1.4)}
+.pin.is-live .pin-dot{background:var(--open)}
+.pin.is-soon .pin-dot{background:var(--paper);border:2.5px solid var(--soon)}
+.pin.sel .pin-dot{transform:scale(1.5)}
+.pin.sel::after{content:"";position:absolute;left:50%;top:50%;width:34px;height:34px;transform:translate(-50%,-50%);
+  border:1px solid var(--ink);border-radius:50%;opacity:.5;animation:ping 1.6s ease-out infinite}
+@keyframes ping{0%{transform:translate(-50%,-50%) scale(.5);opacity:.6}100%{transform:translate(-50%,-50%) scale(1.25);opacity:0}}
+.pin-label{position:absolute;left:16px;top:-3px;white-space:nowrap;font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-2);background:rgba(252,251,249,.82);padding:2px 6px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none}
+.labels-on .pin-label{opacity:1}
+.pin:hover .pin-label{opacity:1}
+.city-badge{position:absolute;left:13px;top:-15px;background:var(--ink);color:var(--paper);border-radius:999px;
+  padding:1px 6px;font-family:var(--mono);font-size:9px;letter-spacing:.06em}
+.labels-on .city-badge{display:none}
+
+/* маркер мастера */
+.mstr{position:relative;cursor:pointer}
+.mstr .av{width:40px;height:40px;font-size:13px;box-shadow:0 0 0 2.5px var(--paper),0 6px 16px -8px rgba(20,17,14,.7);
+  transition:transform .2s cubic-bezier(.2,.8,.3,1),box-shadow .2s}
+.mstr:hover .av{transform:scale(1.12)}
+.mstr.sel .av{box-shadow:0 0 0 2.5px var(--paper),0 0 0 5px var(--lime),0 8px 20px -8px rgba(20,17,14,.7)}
+.mstr-name{position:absolute;left:50%;top:46px;transform:translateX(-50%) translateY(-4px);
+  background:var(--ink);color:var(--paper);white-space:nowrap;padding:5px 11px;border-radius:999px;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;
+  opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:5}
+.mstr:hover .mstr-name,.mstr.sel .mstr-name{opacity:1;transform:translateX(-50%) translateY(0)}
+.mstr-svc{position:absolute;right:-2px;bottom:-2px;width:13px;height:13px;border-radius:50%;background:var(--lime);
+  box-shadow:0 0 0 2px var(--paper)}
+.avatars-off .mstr{display:none}
+
+.toast{position:absolute;left:50%;bottom:22px;transform:translate(-50%,14px);z-index:430;background:var(--ink);color:var(--paper);
+  padding:10px 18px;border-radius:999px;font-size:12.5px;opacity:0;pointer-events:none;transition:.25s}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ==========================================================
+   БОКОВАЯ КАРТОЧКА МАСТЕРА
+   ========================================================== */
+.side{position:absolute;right:16px;top:16px;bottom:auto;width:330px;z-index:450;
+  max-height:calc(100% - 32px);
+  background:var(--card);border:1px solid var(--rule);border-radius:var(--r-card);box-shadow:var(--shadow);
+  display:flex;flex-direction:column;overflow:hidden;
+  transform:translateX(calc(100% + 24px));opacity:0;pointer-events:none;
+  transition:transform .45s cubic-bezier(.2,.8,.25,1),opacity .3s}
+.side.on{transform:none;opacity:1;pointer-events:auto}
+.side-hero{position:relative;height:200px;flex:none;background:#241F1B;overflow:hidden}
+.side-hero .av{width:100%;height:100%;border-radius:0;font-size:50px}
+.side-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,17,14,.05) 40%,rgba(20,17,14,.85))}
+.side-hero-txt{position:absolute;left:18px;right:18px;bottom:16px;z-index:2;color:#FCFBF9}
+.side-hero-txt .eyebrow{color:rgba(252,251,249,.72)}
+.side-hero-txt h3{font-family:var(--mono);font-weight:500;font-size:16px;letter-spacing:.06em;text-transform:uppercase;margin:6px 0 0}
+.side-close{position:absolute;right:12px;top:12px;z-index:3;width:30px;height:30px;border-radius:50%;border:0;cursor:pointer;
+  background:rgba(20,17,14,.55);color:#FCFBF9;font-size:13px;line-height:1;backdrop-filter:blur(4px)}
+.side-close:hover{background:var(--ink)}
+.side-body{padding:16px 18px;overflow-y:auto;flex:0 1 auto;min-height:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.quote{border:1px solid var(--rule);border-radius:14px;padding:14px;background:var(--vellum);font-size:13px;line-height:1.55;color:var(--ink-2)}
+.quote-by{display:flex;align-items:center;gap:8px;margin-top:10px}
+.quote-by .av{width:24px;height:24px;font-size:8px}
+.side-bio{font-size:13.5px;line-height:1.6;color:var(--ink-2);margin:16px 0 0}
+.side-foot{padding:14px 18px;border-top:1px solid var(--rule);display:grid;gap:8px;flex:none}
+
+/* ==========================================================
+   ОВЕРЛЕИ
+   ========================================================== */
+.overlay{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;padding:24px}
+.overlay.on{display:flex}
+.scrim{position:absolute;inset:0;background:rgba(20,17,14,.42);backdrop-filter:blur(3px);animation:fade .3s ease both}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes rise{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
+
+.pcard{position:relative;width:min(620px,100%);max-height:min(88svh,900px);background:var(--card);
+  border-radius:var(--r-card);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;
+  animation:rise .4s cubic-bezier(.2,.8,.25,1) both}
+.pcard-hero{position:relative;height:290px;flex:none;background:#241F1B;overflow:hidden}
+.pcard-hero .av{width:100%;height:100%;border-radius:0;font-size:76px}
+.pcard-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,17,14,.12) 45%,rgba(20,17,14,.88))}
+.pcard-hero-txt{position:absolute;left:26px;right:26px;bottom:22px;z-index:2;color:#FCFBF9}
+.pcard-hero-txt .eyebrow{color:rgba(252,251,249,.75)}
+.pcard-hero-txt h2{font-family:var(--serif);font-weight:300;font-size:40px;line-height:1.04;margin:8px 0 0;letter-spacing:-.02em}
+.icon-btn{position:absolute;z-index:3;width:36px;height:36px;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;
+  background:rgba(252,251,249,.92);color:var(--ink);backdrop-filter:blur(4px);box-shadow:0 4px 14px -8px rgba(0,0,0,.6)}
+.icon-btn:hover{background:#fff}
+.icon-btn.fav{left:18px;top:18px}
+.icon-btn.fav.on{background:var(--lime)}
+.icon-btn.close{right:18px;top:18px}
+.pcard-body{overflow-y:auto;padding:20px 26px 8px}
+.pcard-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.pcard-row .share{margin-left:auto;border:1px solid var(--rule-2);background:transparent;border-radius:999px;padding:7px 14px;cursor:pointer;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.pcard-row .share:hover{border-color:var(--ink);background:var(--vellum)}
+.pcard-cta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0 6px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:14px;overflow:hidden;margin:20px 0}
+.stats div{background:var(--card);padding:13px 14px}
+.stats .k{font-family:var(--serif);font-weight:300;font-size:24px;display:block;line-height:1}
+.stats .v{font-size:11px;color:var(--slate)}
+.pcard-sect{margin:22px 0}
+.pcard-sect p{font-size:14px;line-height:1.65;color:var(--ink-2);margin:12px 0 0}
+.links{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.link-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule-2);border-radius:999px;padding:7px 13px;
+  font-family:var(--mono);font-size:10.5px;color:var(--ink-2);text-decoration:none}
+.link-chip:hover{border-color:var(--ink);background:var(--vellum)}
+.pcard-note{border-top:1px solid var(--rule);padding:14px 26px;flex:none}
+
+.acard{position:relative;width:min(1000px,100%);max-height:min(90svh,860px);background:var(--card);border-radius:var(--r-card);
+  box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-columns:400px 1fr;
+  animation:rise .4s cubic-bezier(.2,.8,.25,1) both}
+.aside-visual{position:relative;background:#100E0C;color:#FCFBF9;padding:26px;display:flex;flex-direction:column;overflow:hidden}
+.aside-visual::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 20% 0%,#2C3A34 0%,#171614 45%,#100E0C 100%)}
+.aside-visual > *{position:relative;z-index:2}
+.av-top{display:flex;align-items:center;justify-content:space-between}
+.av-brand{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-size:18px}
+.av-brand i{width:7px;height:7px;border-radius:50%;background:var(--lime);display:block}
+.av-step{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:rgba(252,251,249,.6)}
+.av-title{font-family:var(--serif);font-weight:300;font-size:33px;line-height:1.1;margin:26px 0 0;letter-spacing:-.02em}
+.av-title em{font-style:italic}
+.av-slides{margin-top:auto}
+.av-slide{display:none}
+.av-slide.on{display:block;animation:fade .35s ease both}
+.av-slide p{font-size:13.5px;line-height:1.6;color:rgba(252,251,249,.72);margin:0}
+.av-dots{display:flex;gap:6px;margin-top:20px}
+.av-dots button{width:22px;height:4px;border-radius:999px;border:0;background:rgba(252,251,249,.28);cursor:pointer;padding:0;transition:.2s}
+.av-dots button.on{background:var(--lime);width:30px}
+.av-foot{margin-top:20px;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:rgba(252,251,249,.5)}
+.av-map{position:absolute;right:-70px;bottom:-50px;width:320px;opacity:.16;z-index:1}
+
+.aform{padding:30px 34px;overflow-y:auto;position:relative}
+.aform h2{font-family:var(--serif);font-weight:300;font-size:31px;margin:12px 0 6px;letter-spacing:-.02em}
+.aform .lede{color:var(--slate);font-size:13.5px;margin:0 0 22px}
+.field{margin-bottom:16px}
+.field label{display:block;margin-bottom:6px;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--slate)}
+.field input,.field select,.field textarea{width:100%;border:0;border-bottom:1px solid var(--rule-2);background:transparent;
+  padding:9px 2px;font-family:var(--sans);font-size:15px;color:var(--ink);outline:none;transition:border-color .15s;border-radius:0}
+.field textarea{resize:vertical;min-height:66px}
+.field input:focus,.field select:focus,.field textarea:focus{border-bottom-color:var(--ink)}
+.field.invalid input,.field.invalid select{border-bottom-color:#A33A25}
+.field .err{display:none;margin-top:5px;font-size:11.5px;color:#A33A25}
+.field.invalid .err{display:block}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 18px}
+.plan{border:1px solid var(--rule-2);border-radius:16px;padding:14px;cursor:pointer;background:transparent;text-align:left;transition:.18s}
+.plan:hover{border-color:var(--ink)}
+.plan.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.plan .pn{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--slate);display:block}
+.plan.on .pn{color:var(--lime)}
+.plan .pt{font-family:var(--serif);font-weight:400;font-size:19px;margin:6px 0 4px;display:block}
+.plan .pd{font-size:12px;line-height:1.45;color:var(--slate);display:block}
+.plan.on .pd{color:rgba(252,251,249,.72)}
+.consent{display:flex;gap:9px;align-items:flex-start;font-size:12px;color:var(--slate);margin:6px 0 18px}
+.consent input{margin-top:2px;accent-color:var(--ink)}
+.aform-close{position:absolute;right:16px;top:16px;z-index:5}
+.fine{font-family:var(--mono);font-size:10px;color:var(--slate);margin-top:18px;line-height:1.7}
+
+.done{padding:44px 20px;text-align:center}
+.seal{width:78px;height:78px;margin:0 auto 20px;border-radius:50%;background:var(--lime);display:grid;place-items:center;
+  animation:rise .45s cubic-bezier(.2,.8,.3,1) both}
+.done h3{font-family:var(--serif);font-weight:300;font-size:30px;margin:0 0 10px}
+.done p{color:var(--slate);font-size:14px;margin:0 auto 20px;max-width:36ch}
+.ticket{display:inline-block;border:1px dashed var(--rule-2);padding:9px 16px;border-radius:999px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;margin-bottom:22px}
+
+/* ==========================================================
+   НИЖНИЕ СЕКЦИИ
+   ========================================================== */
+.strip{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);background:var(--vellum)}
+.strip div{padding:20px 22px;border-right:1px solid var(--rule)}
+.strip div:last-child{border-right:0}
+.strip .k{font-family:var(--serif);font-weight:300;font-size:34px;line-height:1;display:block;margin-bottom:6px}
+.strip .v{font-size:12.5px;color:var(--slate)}
+.how{padding:64px 22px;max-width:1080px;margin:0 auto}
+.how h2{font-family:var(--serif);font-weight:300;font-size:38px;line-height:1.1;margin:12px 0 44px;letter-spacing:-.02em;max-width:18ch}
+.how h2 em{font-style:italic}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:18px;overflow:hidden}
+.step{background:var(--paper);padding:26px 24px}
+.step-n{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--slate);display:block;margin-bottom:16px}
+.step h3{font-family:var(--serif);font-weight:400;font-size:21px;margin:0 0 8px}
+.step p{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.6}
+.foot{border-top:1px solid var(--rule);padding:26px 22px;display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.foot .eyebrow{margin-right:auto}
+.foot a{font-size:12.5px;color:var(--slate);text-decoration:none}
+.foot a:hover{color:var(--ink)}
+
+/* ==========================================================
+   АДАПТИВ
+   ========================================================== */
+@media (max-width:1180px){ .acard{grid-template-columns:330px 1fr} }
+@media (max-width:1080px){ :root{--panel-w:360px} .side{width:300px} }
+@media (max-width:940px){ .acard{grid-template-columns:1fr} .aside-visual{display:none} }
+@media (max-width:900px){
+  .topnav{display:none}
+  .stage{grid-template-columns:1fr;grid-template-rows:52svh auto;height:auto}
+  .map-wrap{height:52svh;order:1}
+  .panel{order:2;border-right:0;border-top:1px solid var(--rule)}
+  .panel-body{overflow:visible}
+  .legend{right:10px;top:10px;padding:9px 11px}
+  .readout{left:10px;bottom:10px;gap:10px}
+  .zoomer{right:10px;bottom:56px}
+  .side{left:10px;right:10px;top:auto;bottom:10px;width:auto;height:auto;max-height:calc(100% - 20px)}
+  .side-hero{height:140px}
+  .strip{grid-template-columns:1fr 1fr}
+  .strip div:nth-child(2){border-right:0}
+  .strip div:nth-child(1),.strip div:nth-child(2){border-bottom:1px solid var(--rule)}
+  .steps{grid-template-columns:1fr}
+  .how{padding:48px 20px}.how h2{font-size:30px}
+  .overlay{padding:0}
+  .pcard,.acard{width:100%;max-height:100svh;height:100svh;border-radius:0}
+  .pcard-hero{height:210px}
+  .pcard-hero-txt h2{font-size:30px}
+  .aform{padding:24px 20px 34px}
+  .two{grid-template-columns:1fr;gap:0}
+  .plans{grid-template-columns:1fr}
+  .pcard-cta{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
+/* ==========================================================
+   ТИПОГРАФИКА — гротеск с курсивом, как в референсе
+   ========================================================== */
+.brand-mark,.panel-title,.result-city,.verdict h3,.step h3,.how h2,.strip .k,.stats .k,
+.pcard-hero-txt h2,.av-brand,.av-title,.aform h2,.done h3,.plan .pt,.side-hero-txt h3{
+  font-family:var(--display);
+  font-weight:600;
+  letter-spacing:-.035em;
+}
+.panel-title em,.how h2 em,.av-title em{font-style:italic;font-weight:600}
+
+/* размеры пересчитаны под гротеск — он визуально крупнее */
+.brand-mark{font-weight:700;font-size:19px;letter-spacing:.01em;text-transform:uppercase}
+.panel-title{font-size:27px;line-height:1.08}
+.result-city{font-size:31px;line-height:1.02}
+.verdict h3{font-size:17.5px;letter-spacing:-.02em}
+.side-hero-txt h3{font-family:var(--display);font-size:19px;letter-spacing:-.02em;text-transform:none}
+.pcard-hero-txt h2{font-size:37px;line-height:1}
+.aform h2{font-size:28px}
+.done h3{font-size:27px}
+.how h2{font-size:35px;line-height:1.06}
+.step h3{font-size:19.5px;letter-spacing:-.025em}
+.av-title{font-size:30px;line-height:1.08}
+.av-brand{font-weight:700;font-size:15px;letter-spacing:.02em;text-transform:uppercase}
+.plan .pt{font-size:17.5px;letter-spacing:-.025em}
+.strip .k,.stats .k{font-weight:600;letter-spacing:-.04em}
+.strip .k{font-size:32px}
+.stats .k{font-size:23px}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">ОХВАТ</span><i class="brand-dot"></i>
+    <span class="brand-sub">сеть продвигаемых мастеров</span>
+  </div>
+  <nav class="topnav">
+    <a href="#" class="on" id="nav-map">Карта</a>
+    <a href="#how">Как это работает</a>
+    <a href="#" id="nav-open">Свободные города</a>
+  </nav>
+  <button class="btn btn-ink" id="cta-top">Подать заявку</button>
+</header>
+
+<main class="stage">
+
+  <aside class="panel">
+    <div class="panel-head">
+      <span class="eyebrow">Шаг 1 · Город и услуга</span>
+      <h1 class="panel-title">Где вы <em>работаете?</em></h1>
+      <p class="panel-lede">Введите адрес, город или индекс и выберите свою услугу — покажем, свободен ли слот.</p>
+
+      <div class="search">
+        <div class="search-field">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M10.8 10.8 14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Адрес, город или индекс / ZIP" aria-label="Адрес, город или почтовый индекс">
+          <button class="search-go" id="go">Найти</button>
+        </div>
+        <div class="suggest" id="suggest" role="listbox" aria-label="Подсказки"></div>
+        <div class="svc-row">
+          <label class="eyebrow" for="svc">Услуга</label>
+          <select id="svc" aria-label="Ваша услуга"></select>
+        </div>
+        <div class="search-hint">
+          <button class="chip" data-ex="440 E 89th St, New York">440 E 89th St</button>
+          <button class="chip" data-ex="10001">10001</button>
+          <button class="chip" data-ex="Чикаго">Чикаго</button>
+          <button class="chip" data-ex="Остин">Остин</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-body" id="panel-body"></div>
+
+    <div class="panel-foot">
+      <span class="eyebrow">Или тапните точку на карте</span>
+      <span class="eyebrow num" id="foot-count">—</span>
+    </div>
+  </aside>
+
+  <div class="map-wrap">
+    <div id="map"></div>
+
+    <div class="reticle" id="reticle" aria-hidden="true">
+      <span class="h"></span><span class="v"></span><span class="b"></span>
+    </div>
+
+    <div class="legend">
+      <div class="legend-row"><i class="legend-av"></i> Мастер в сети <span class="legend-n" id="n-mstr">—</span></div>
+      <div class="legend-row"><i class="dot live"></i> Город открыт <span class="legend-n" id="n-live">—</span></div>
+      <div class="legend-row"><i class="dot soon"></i> Скоро запускаем <span class="legend-n" id="n-soon">—</span></div>
+    </div>
+
+    <div class="zoomer">
+      <button id="zin" aria-label="Приблизить">+</button>
+      <button id="zout" aria-label="Отдалить">−</button>
+    </div>
+
+    <div class="readout" id="readout">
+      <span><b>ШИР</b> <span id="r-lat">00.000</span></span>
+      <span><b>ДОЛ</b> <span id="r-lng">00.000</span></span>
+      <span><b>МСШТ</b> <span id="r-z">3</span></span>
+    </div>
+
+    <aside class="side" id="side" aria-live="polite"></aside>
+    <div class="toast" id="toast"></div>
+  </div>
+</main>
+
+<section class="strip">
+  <div><span class="k num" id="s1">—</span><span class="v">городов на карте</span></div>
+  <div><span class="k num" id="s2">—</span><span class="v">мастеров в сети</span></div>
+  <div><span class="k num" id="s3">—</span><span class="v">свободных слотов</span></div>
+  <div><span class="k num">2</span><span class="v">рабочих дня на ответ</span></div>
+</section>
+
+<section class="how" id="how">
+  <span class="eyebrow">Порядок действий</span>
+  <h2>Один город, одна услуга — <em>один мастер</em></h2>
+  <div class="steps">
+    <div class="step"><span class="step-n">01 — ПОИСК</span><h3>Найдите город</h3>
+      <p>Введите название или индекс, либо тапните точку на карте. Аватары на карте — мастера, которых мы уже продвигаем.</p></div>
+    <div class="step"><span class="step-n">02 — ПРОВЕРКА</span><h3>Проверьте слот по услуге</h3>
+      <p>Выберите свою услугу: если в городе по ней ещё нет мастера — слот ваш. Если есть — откроется его профиль.</p></div>
+    <div class="step"><span class="step-n">03 — ЗАЯВКА</span><h3>Заполните заявку</h3>
+      <p>Форма открывается прямо поверх карты. Отвечаем за два рабочих дня и присылаем условия по городу.</p></div>
+  </div>
+</section>
+
+<footer class="foot" id="foot">
+  <span class="eyebrow">ОХВАТ · сеть продвигаемых мастеров · 2026</span>
+  <a href="#">hello@example.com</a><a href="#">Telegram</a><a href="#">Политика конфиденциальности</a>
+</footer>
+
+<div class="overlay" id="ov-profile"><div class="scrim" data-close></div><div class="pcard" id="pcard" role="dialog" aria-modal="true" aria-label="Профиль мастера"></div></div>
+<div class="overlay" id="ov-apply"><div class="scrim" data-close></div><div class="acard" id="acard" role="dialog" aria-modal="true" aria-label="Заявка"></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+/* =======================================================================
+   1. ДАННЫЕ
+   ======================================================================= */
+const SERVICES = [
+  {id:"barber",ru:"Барбер"},{id:"tattoo",ru:"Тату-мастер"},{id:"nails",ru:"Мастер маникюра"},
+  {id:"brows",ru:"Бровист"},{id:"hair",ru:"Колорист"},{id:"makeup",ru:"Визажист"},
+  {id:"photo",ru:"Фотограф"},{id:"coach",ru:"Фитнес-тренер"},{id:"massage",ru:"Массажист"},{id:"stylist",ru:"Стилист"}
+];
+
+/* s: "live" — город открыт | "soon" — запускаем */
+const ALL_CITIES = [
+  {n:"New York",ru:"Нью-Йорк",c:"США",lat:40.7128,lng:-74.0060,s:"live",reach:"8.4 млн"},
+  {n:"Los Angeles",ru:"Лос-Анджелес",c:"США",lat:34.0522,lng:-118.2437,s:"live",reach:"3.9 млн"},
+  {n:"Chicago",ru:"Чикаго",c:"США",lat:41.8781,lng:-87.6298,s:"live",reach:"2.7 млн"},
+  {n:"Houston",ru:"Хьюстон",c:"США",lat:29.7604,lng:-95.3698,s:"soon",reach:"2.3 млн"},
+  {n:"Miami",ru:"Майами",c:"США",lat:25.7617,lng:-80.1918,s:"live",reach:"1.2 млн"},
+  {n:"San Francisco",ru:"Сан-Франциско",c:"США",lat:37.7749,lng:-122.4194,s:"live",reach:"0.9 млн"},
+  {n:"Seattle",ru:"Сиэтл",c:"США",lat:47.6062,lng:-122.3321,s:"live",reach:"0.8 млн"},
+  {n:"Austin",ru:"Остин",c:"США",lat:30.2672,lng:-97.7431,s:"live",reach:"1.0 млн"},
+  {n:"Boston",ru:"Бостон",c:"США",lat:42.3601,lng:-71.0589,s:"live",reach:"0.7 млн"},
+  {n:"Denver",ru:"Денвер",c:"США",lat:39.7392,lng:-104.9903,s:"live",reach:"0.7 млн"},
+  {n:"Atlanta",ru:"Атланта",c:"США",lat:33.7490,lng:-84.3880,s:"live",reach:"0.5 млн"},
+  {n:"Phoenix",ru:"Финикс",c:"США",lat:33.4484,lng:-112.0740,s:"soon",reach:"1.6 млн"},
+  {n:"Las Vegas",ru:"Лас-Вегас",c:"США",lat:36.1699,lng:-115.1398,s:"live",reach:"0.6 млн"},
+  {n:"Dallas",ru:"Даллас",c:"США",lat:32.7767,lng:-96.7970,s:"live",reach:"1.3 млн"},
+  {n:"Philadelphia",ru:"Филадельфия",c:"США",lat:39.9526,lng:-75.1652,s:"live",reach:"1.6 млн"},
+  {n:"San Diego",ru:"Сан-Диего",c:"США",lat:32.7157,lng:-117.1611,s:"live",reach:"1.4 млн"},
+  {n:"Portland",ru:"Портленд",c:"США",lat:45.5152,lng:-122.6784,s:"soon",reach:"0.6 млн"},
+  {n:"Nashville",ru:"Нэшвилл",c:"США",lat:36.1627,lng:-86.7816,s:"live",reach:"0.7 млн"},
+  {n:"Detroit",ru:"Детройт",c:"США",lat:42.3314,lng:-83.0458,s:"live",reach:"0.6 млн"},
+  {n:"Minneapolis",ru:"Миннеаполис",c:"США",lat:44.9778,lng:-93.2650,s:"soon",reach:"0.4 млн"},
+  {n:"San Jose",ru:"Сан-Хосе",c:"США",lat:37.3382,lng:-121.8863,s:"live",reach:"0.4 млн"},
+  {n:"San Antonio",ru:"Сан-Антонио",c:"США",lat:29.4241,lng:-98.4936,s:"live",reach:"0.6 млн"},
+  {n:"Charlotte",ru:"Шарлотт",c:"США",lat:35.2271,lng:-80.8431,s:"live",reach:"0.4 млн"},
+  {n:"Columbus",ru:"Колумбус",c:"США",lat:39.9612,lng:-82.9988,s:"live",reach:"0.4 млн"},
+  {n:"Indianapolis",ru:"Индианаполис",c:"США",lat:39.7684,lng:-86.1581,s:"soon",reach:"0.3 млн"},
+  {n:"Kansas City",ru:"Канзас-Сити",c:"США",lat:39.0997,lng:-94.5786,s:"live",reach:"0.3 млн"},
+  {n:"Salt Lake City",ru:"Солт-Лейк-Сити",c:"США",lat:40.7608,lng:-111.8910,s:"soon",reach:"0.3 млн"},
+  {n:"Orlando",ru:"Орландо",c:"США",lat:28.5383,lng:-81.3792,s:"live",reach:"0.5 млн"},
+  {n:"Tampa",ru:"Тампа",c:"США",lat:27.9506,lng:-82.4572,s:"live",reach:"0.4 млн"},
+  {n:"New Orleans",ru:"Новый Орлеан",c:"США",lat:29.9511,lng:-90.0715,s:"live",reach:"0.3 млн"},
+  {n:"Pittsburgh",ru:"Питтсбург",c:"США",lat:40.4406,lng:-79.9959,s:"soon",reach:"0.3 млн"},
+  {n:"Cleveland",ru:"Кливленд",c:"США",lat:41.4993,lng:-81.6944,s:"live",reach:"0.3 млн"},
+  {n:"Sacramento",ru:"Сакраменто",c:"США",lat:38.5816,lng:-121.4944,s:"live",reach:"0.4 млн"},
+  {n:"Raleigh",ru:"Роли",c:"США",lat:35.7796,lng:-78.6382,s:"live",reach:"0.3 млн"},
+  {n:"Baltimore",ru:"Балтимор",c:"США",lat:39.2904,lng:-76.6122,s:"live",reach:"0.5 млн"},
+  {n:"Milwaukee",ru:"Милуоки",c:"США",lat:43.0389,lng:-87.9065,s:"soon",reach:"0.3 млн"},
+  {n:"Oklahoma City",ru:"Оклахома-Сити",c:"США",lat:35.4676,lng:-97.5164,s:"live",reach:"0.3 млн"},
+  {n:"Memphis",ru:"Мемфис",c:"США",lat:35.1495,lng:-90.0490,s:"live",reach:"0.3 млн"},
+  {n:"Louisville",ru:"Луисвилл",c:"США",lat:38.2527,lng:-85.7585,s:"live",reach:"0.3 млн"},
+  {n:"Richmond",ru:"Ричмонд",c:"США",lat:37.5407,lng:-77.4360,s:"soon",reach:"0.2 млн"},
+  {n:"Toronto",ru:"Торонто",c:"Канада",lat:43.6532,lng:-79.3832,s:"live",reach:"2.8 млн"},
+  {n:"Vancouver",ru:"Ванкувер",c:"Канада",lat:49.2827,lng:-123.1207,s:"live",reach:"0.7 млн"},
+  {n:"Montreal",ru:"Монреаль",c:"Канада",lat:45.5019,lng:-73.5674,s:"soon",reach:"1.8 млн"},
+  {n:"London",ru:"Лондон",c:"Великобритания",lat:51.5074,lng:-0.1278,s:"live",reach:"8.9 млн"},
+  {n:"Paris",ru:"Париж",c:"Франция",lat:48.8566,lng:2.3522,s:"live",reach:"2.1 млн"},
+  {n:"Berlin",ru:"Берлин",c:"Германия",lat:52.5200,lng:13.4050,s:"live",reach:"3.7 млн"},
+  {n:"Madrid",ru:"Мадрид",c:"Испания",lat:40.4168,lng:-3.7038,s:"live",reach:"3.3 млн"},
+  {n:"Barcelona",ru:"Барселона",c:"Испания",lat:41.3874,lng:2.1686,s:"soon",reach:"1.6 млн"},
+  {n:"Amsterdam",ru:"Амстердам",c:"Нидерланды",lat:52.3676,lng:4.9041,s:"live",reach:"0.9 млн"},
+  {n:"Milan",ru:"Милан",c:"Италия",lat:45.4642,lng:9.1900,s:"live",reach:"1.4 млн"},
+  {n:"Rome",ru:"Рим",c:"Италия",lat:41.9028,lng:12.4964,s:"soon",reach:"2.8 млн"},
+  {n:"Lisbon",ru:"Лиссабон",c:"Португалия",lat:38.7223,lng:-9.1393,s:"live",reach:"0.5 млн"},
+  {n:"Warsaw",ru:"Варшава",c:"Польша",lat:52.2297,lng:21.0122,s:"live",reach:"1.8 млн"},
+  {n:"Prague",ru:"Прага",c:"Чехия",lat:50.0755,lng:14.4378,s:"soon",reach:"1.3 млн"},
+  {n:"Vienna",ru:"Вена",c:"Австрия",lat:48.2082,lng:16.3738,s:"live",reach:"1.9 млн"},
+  {n:"Stockholm",ru:"Стокгольм",c:"Швеция",lat:59.3293,lng:18.0686,s:"live",reach:"1.0 млн"},
+  {n:"Copenhagen",ru:"Копенгаген",c:"Дания",lat:55.6761,lng:12.5683,s:"soon",reach:"0.8 млн"},
+  {n:"Zurich",ru:"Цюрих",c:"Швейцария",lat:47.3769,lng:8.5417,s:"live",reach:"0.4 млн"},
+  {n:"Istanbul",ru:"Стамбул",c:"Турция",lat:41.0082,lng:28.9784,s:"live",reach:"15.5 млн"},
+  {n:"Moscow",ru:"Москва",c:"Россия",lat:55.7558,lng:37.6173,s:"live",reach:"13.0 млн"},
+  {n:"Saint Petersburg",ru:"Санкт-Петербург",c:"Россия",lat:59.9311,lng:30.3609,s:"live",reach:"5.6 млн"},
+  {n:"Kazan",ru:"Казань",c:"Россия",lat:55.7963,lng:49.1088,s:"live",reach:"1.3 млн"},
+  {n:"Yekaterinburg",ru:"Екатеринбург",c:"Россия",lat:56.8389,lng:60.6057,s:"soon",reach:"1.5 млн"},
+  {n:"Novosibirsk",ru:"Новосибирск",c:"Россия",lat:55.0084,lng:82.9357,s:"live",reach:"1.6 млн"},
+  {n:"Sochi",ru:"Сочи",c:"Россия",lat:43.5855,lng:39.7231,s:"live",reach:"0.5 млн"},
+  {n:"Almaty",ru:"Алматы",c:"Казахстан",lat:43.2220,lng:76.8512,s:"live",reach:"2.2 млн"},
+  {n:"Tashkent",ru:"Ташкент",c:"Узбекистан",lat:41.2995,lng:69.2401,s:"soon",reach:"2.9 млн"},
+  {n:"Tbilisi",ru:"Тбилиси",c:"Грузия",lat:41.7151,lng:44.8271,s:"live",reach:"1.2 млн"},
+  {n:"Yerevan",ru:"Ереван",c:"Армения",lat:40.1792,lng:44.4991,s:"live",reach:"1.1 млн"},
+  {n:"Baku",ru:"Баку",c:"Азербайджан",lat:40.4093,lng:49.8671,s:"soon",reach:"2.3 млн"},
+  {n:"Dubai",ru:"Дубай",c:"ОАЭ",lat:25.2048,lng:55.2708,s:"live",reach:"3.6 млн"},
+  {n:"Tel Aviv",ru:"Тель-Авив",c:"Израиль",lat:32.0853,lng:34.7818,s:"live",reach:"0.5 млн"},
+  {n:"Tokyo",ru:"Токио",c:"Япония",lat:35.6762,lng:139.6503,s:"live",reach:"13.9 млн"},
+  {n:"Seoul",ru:"Сеул",c:"Корея",lat:37.5665,lng:126.9780,s:"live",reach:"9.7 млн"},
+  {n:"Singapore",ru:"Сингапур",c:"Сингапур",lat:1.3521,lng:103.8198,s:"live",reach:"5.7 млн"},
+  {n:"Bangkok",ru:"Бангкок",c:"Таиланд",lat:13.7563,lng:100.5018,s:"soon",reach:"8.3 млн"},
+  {n:"Mumbai",ru:"Мумбаи",c:"Индия",lat:19.0760,lng:72.8777,s:"live",reach:"12.4 млн"},
+  {n:"Sydney",ru:"Сидней",c:"Австралия",lat:-33.8688,lng:151.2093,s:"live",reach:"5.3 млн"},
+  {n:"Melbourne",ru:"Мельбурн",c:"Австралия",lat:-37.8136,lng:144.9631,s:"soon",reach:"5.0 млн"},
+  {n:"Mexico City",ru:"Мехико",c:"Мексика",lat:19.4326,lng:-99.1332,s:"live",reach:"9.2 млн"},
+  {n:"Sao Paulo",ru:"Сан-Паулу",c:"Бразилия",lat:-23.5505,lng:-46.6333,s:"live",reach:"12.3 млн"},
+  {n:"Buenos Aires",ru:"Буэнос-Айрес",c:"Аргентина",lat:-34.6037,lng:-58.3816,s:"soon",reach:"3.1 млн"},
+  {n:"Cape Town",ru:"Кейптаун",c:"ЮАР",lat:-33.9249,lng:18.4241,s:"live",reach:"4.6 млн"}
+];
+
+/* photo: "https://…" — если указать, подставится фото вместо инициалов */
+const ALL_MASTERS = [
+  {id:"m01",name:"Марк Левин",city:"New York",svc:"barber",photo:null,since:2023,works:412,rate:"4.9",
+   quote:"Стрижка — это не услуга, а десять минут, когда человек снова себе нравится.",
+   bio:"Барбер с четырнадцатью годами практики, шесть из них — в Бруклине. Специализируется на классических фейдах и работе с седой бородой. Ведёт мастер-классы для начинающих и держит запись на месяц вперёд.",
+   tags:["Классика","Фейд","Борода"],links:[{t:"instagram.com/marklevin",u:"#"},{t:"marklevin.nyc",u:"#"}]},
+  {id:"m02",name:"Дина Аюпова",city:"New York",svc:"nails",photo:null,since:2024,works:960,rate:"5.0",
+   quote:"Маникюр держится четыре недели, а впечатление от мастера — гораздо дольше.",
+   bio:"Мастер маникюра: укрепление и сложный дизайн. Пришла из графического дизайна, поэтому собирает ногтевые коллекции сезонами, как капсулы одежды.",
+   tags:["Дизайн","Укрепление","Аппаратный"],links:[{t:"instagram.com/dina.nails",u:"#"}]},
+  {id:"m03",name:"Илья Ковач",city:"New York",svc:"tattoo",photo:null,since:2022,works:288,rate:"4.8",
+   quote:"Хорошая татуировка выглядит так, будто была на коже всегда.",
+   bio:"Тату-мастер: тонкая линия и графика по мотивам старых ботанических атласов. Принимает по эскизу, одна работа в день.",
+   tags:["Fine line","Ботаника","Графика"],links:[{t:"instagram.com/kovach.ink",u:"#"}]},
+  {id:"m04",name:"Софи Марен",city:"Paris",svc:"hair",photo:null,since:2021,works:1340,rate:"4.9",
+   quote:"Цвет должен подходить не фотографии, а понедельничному утру.",
+   bio:"Колорист, двенадцать лет в парижских салонах. Работает со сложными переходами и восстановлением после домашних окрашиваний.",
+   tags:["Балаяж","Блонд","Восстановление"],links:[{t:"sophiemaren.fr",u:"#"}]},
+  {id:"m05",name:"Лука Бертони",city:"Milan",svc:"stylist",photo:null,since:2020,works:520,rate:"4.9",
+   quote:"Гардероб — это не покупки, а редактура того, что уже есть.",
+   bio:"Персональный стилист. Начинал ассистентом на съёмках, теперь собирает капсулы для тех, у кого полный шкаф и нечего надеть.",
+   tags:["Капсулы","Разбор гардероба","Шопинг"],links:[{t:"bertoni.style",u:"#"}]},
+  {id:"m06",name:"Анна Штерн",city:"Berlin",svc:"photo",photo:null,since:2019,works:770,rate:"5.0",
+   quote:"Съёмка получается, когда человек забывает про камеру на тридцать секунд.",
+   bio:"Фотограф: портрет и репортаж на плёнку и цифру. Снимает бренды мастеров — то, что потом живёт в их профилях и на вывесках.",
+   tags:["Портрет","Плёнка","Бренд-съёмка"],links:[{t:"annastern.photo",u:"#"}]},
+  {id:"m07",name:"Тимур Аскаров",city:"Moscow",svc:"barber",photo:null,since:2022,works:1105,rate:"4.9",
+   quote:"Постоянный клиент — это не скидка, это память о том, как он любит.",
+   bio:"Барбер и совладелец мастерской на три кресла. Учит команду работать без спешки: шесть клиентов в день вместо двенадцати.",
+   tags:["Классика","Опасная бритва","Обучение"],links:[{t:"instagram.com/askarov.cuts",u:"#"}]},
+  {id:"m08",name:"Вера Логинова",city:"Moscow",svc:"brows",photo:null,since:2023,works:1480,rate:"5.0",
+   quote:"Брови не рисуют заново — их возвращают на место.",
+   bio:"Бровист: натуральная форма и коррекция после неудачного перманента. Ведёт курс для мастеров о работе с формой лица.",
+   tags:["Форма","Ламинирование","Коррекция"],links:[{t:"instagram.com/vera.brows",u:"#"}]},
+  {id:"m09",name:"Камиль Рахимов",city:"Kazan",svc:"tattoo",photo:null,since:2021,works:340,rate:"4.8",
+   quote:"Орнамент — это язык, на котором говорили до нас.",
+   bio:"Тату-мастер, соединяет татарский орнамент с современной графикой. Каждый эскиз рисует вручную под конкретного человека.",
+   tags:["Орнамент","Блэкворк","Авторский эскиз"],links:[{t:"instagram.com/rahimov.tattoo",u:"#"}]},
+  {id:"m10",name:"Ника Орлова",city:"Saint Petersburg",svc:"makeup",photo:null,since:2020,works:890,rate:"4.9",
+   quote:"Лучший макияж тот, после которого спрашивают про отпуск, а не про визажиста.",
+   bio:"Визажист: свадьбы, съёмки, обучение самомакияжу. Работает с возрастным макияжем — направлением, которое обычно обходят стороной.",
+   tags:["Свадебный","Возрастной","Обучение"],links:[{t:"nikaorlova.ru",u:"#"}]},
+  {id:"m11",name:"Джей Ортис",city:"Los Angeles",svc:"coach",photo:null,since:2018,works:2100,rate:"4.9",
+   quote:"Программа, которую невозможно выполнить в плохую неделю, — плохая программа.",
+   bio:"Тренер по силовой подготовке. Работает с людьми после травм и с теми, кто возвращается в спорт после долгого перерыва.",
+   tags:["Сила","Реабилитация","Онлайн"],links:[{t:"ortiz.training",u:"#"}]},
+  {id:"m12",name:"Мэй Танака",city:"Tokyo",svc:"nails",photo:null,since:2019,works:1620,rate:"5.0",
+   quote:"Минимализм требует больше времени, чем узор.",
+   bio:"Мастер маникюра, японская школа: гигиена, форма, почти незаметный дизайн. Принимает четырёх человек в день.",
+   tags:["Японский","Минимализм","Уход"],links:[{t:"instagram.com/mei.nail",u:"#"}]},
+  {id:"m13",name:"Дэниел Ро",city:"Seoul",svc:"hair",photo:null,since:2021,works:1180,rate:"4.8",
+   quote:"Стрижка должна держать форму на четвёртой неделе, а не на первой.",
+   bio:"Колорист и стилист по волосам. Известен мягкими пепельными оттенками и работой с тонкими волосами.",
+   tags:["Пепельный","Тонкие волосы","Уход"],links:[{t:"instagram.com/danielroh",u:"#"}]},
+  {id:"m14",name:"Лейла Хамди",city:"Dubai",svc:"massage",photo:null,since:2020,works:1450,rate:"4.9",
+   quote:"Тело помнит рабочую неделю лучше, чем календарь.",
+   bio:"Массажист: глубокие техники и работа с офисной осанкой. Выезжает к клиентам и ведёт группы для команд компаний.",
+   tags:["Глубокий","Осанка","Выезд"],links:[{t:"laylahamdi.ae",u:"#"}]},
+  {id:"m15",name:"Мария Феррейра",city:"Lisbon",svc:"photo",photo:null,since:2022,works:430,rate:"4.9",
+   quote:"Свет в Лиссабоне делает половину работы, вторую половину делаю я.",
+   bio:"Фотограф: портреты на натуре и контент для мастеров. Снимает быстро — за час получается материал на квартал.",
+   tags:["Натура","Контент","Портрет"],links:[{t:"mferreira.photo",u:"#"}]},
+  {id:"m16",name:"Олег Дацюк",city:"Warsaw",svc:"barber",photo:null,since:2021,works:980,rate:"4.8",
+   quote:"Кресло барбера — единственное место, где мужчина молчит и это нормально.",
+   bio:"Барбер, собрал клиентуру с нуля за полтора года. Работает по записи, шесть дней в неделю.",
+   tags:["Классика","Мужской уход"],links:[{t:"instagram.com/datsiuk.barber",u:"#"}]},
+  {id:"m17",name:"Эмма Райт",city:"London",svc:"brows",photo:null,since:2019,works:2200,rate:"5.0",
+   quote:"Симметрия — миф, гармония — цель.",
+   bio:"Бровист и лашмейкер. Восемь лет частной практики в Хакни, лист ожидания на шесть недель.",
+   tags:["Форма","Ламинирование","Ресницы"],links:[{t:"emmawright.london",u:"#"}]},
+  {id:"m18",name:"Гоар Мкртчян",city:"Yerevan",svc:"makeup",photo:null,since:2022,works:610,rate:"4.9",
+   quote:"Свадебный макияж проверяется не зеркалом, а фотографиями через год.",
+   bio:"Визажист: свадебный и вечерний макияж. Работает в паре с фотографом, снимает результат каждой работы.",
+   tags:["Свадебный","Вечерний"],links:[{t:"instagram.com/goar.makeup",u:"#"}]},
+  {id:"m19",name:"Пабло Ривера",city:"Mexico City",svc:"tattoo",photo:null,since:2020,works:520,rate:"4.8",
+   quote:"Цвет держится, если делать его один раз и правильно.",
+   bio:"Тату-мастер, цветной неотрадишнл. Работает с перекрытием старых работ — половина записи именно про это.",
+   tags:["Цвет","Neo-trad","Перекрытие"],links:[{t:"instagram.com/pablo.tinta",u:"#"}]},
+  {id:"m20",name:"Аружан Сеит",city:"Almaty",svc:"nails",photo:null,since:2023,works:740,rate:"4.9",
+   quote:"Клиент возвращается за спокойствием, а не за цветом.",
+   bio:"Мастер маникюра, студия на двоих. Ставка на стерильность и тишину: без музыки, без спешки, без разговоров, если человек не хочет.",
+   tags:["Стерильность","Дизайн","Уход"],links:[{t:"instagram.com/aruzhan.nails",u:"#"}]},
+  {id:"m21",name:"Крис Валлен",city:"Toronto",svc:"coach",photo:null,since:2019,works:1700,rate:"4.8",
+   quote:"Первые три месяца решают всё, дальше решает привычка.",
+   bio:"Тренер, работает с новичками сорок плюс. Ведёт небольшие группы и онлайн-сопровождение.",
+   tags:["Новички","Группы","Онлайн"],links:[{t:"vallen.fit",u:"#"}]},
+  {id:"m22",name:"Юлия Гросс",city:"Berlin",svc:"massage",photo:null,since:2021,works:1020,rate:"4.9",
+   quote:"Час на столе стоит трёх часов сна — если час сделан правильно.",
+   bio:"Массажист: спортивные и восстановительные техники. Сотрудничает с двумя студиями пилатеса.",
+   tags:["Спортивный","Восстановление"],links:[{t:"juliagross.de",u:"#"}]},
+
+  /* --- США --- */
+  {id:"m23",name:"Ханна Прайс",city:"Los Angeles",svc:"makeup",photo:null,since:2021,works:840,rate:"4.9",
+   quote:"Камера прощает всё, кроме плохо подобранного тона.",
+   bio:"Визажист, восемь лет на съёмочных площадках. Работает с естественным светом и тем макияжем, который переживает двенадцатичасовую смену.",
+   tags:["Съёмки","Естественный","Свет"],links:[{t:"instagram.com/hannah.price",u:"#"}]},
+  {id:"m24",name:"Диего Салас",city:"Chicago",svc:"barber",photo:null,since:2020,works:1560,rate:"4.9",
+   quote:"Хорошая стрижка живёт шесть недель, а не шесть дней.",
+   bio:"Барбер, вырос в семейной парикмахерской в Пильзене. Держит два кресла и учит младшего брата ремеслу.",
+   tags:["Фейд","Классика","Семейная"],links:[{t:"instagram.com/salas.cuts",u:"#"}]},
+  {id:"m25",name:"Кара Уиллис",city:"Miami",svc:"nails",photo:null,since:2022,works:1120,rate:"5.0",
+   quote:"Во влажном климате держится только та работа, которую не торопили.",
+   bio:"Мастер маникюра, специализируется на укреплении и стойких покрытиях. Ведёт запись за три недели вперёд.",
+   tags:["Укрепление","Стойкость","Дизайн"],links:[{t:"instagram.com/kara.nails",u:"#"}]},
+  {id:"m26",name:"Нейт Окафор",city:"San Francisco",svc:"photo",photo:null,since:2019,works:690,rate:"4.9",
+   quote:"Портрет удаётся, когда человек перестаёт позировать и начинает сидеть.",
+   bio:"Фотограф: портреты и предметная съёмка для небольших студий. Снимает при постоянном свете, отдаёт материал за сутки.",
+   tags:["Портрет","Предметка","Быстро"],links:[{t:"nateokafor.photo",u:"#"}]},
+  {id:"m27",name:"Эмили Чен",city:"Seattle",svc:"hair",photo:null,since:2020,works:1290,rate:"4.9",
+   quote:"Тонкие волосы не нужно спасать, им нужен правильный срез.",
+   bio:"Колорист и стилист, работает с тонкими и повреждёнными волосами. Известна мягкими холодными оттенками без желтизны.",
+   tags:["Холодный блонд","Тонкие волосы","Уход"],links:[{t:"instagram.com/emily.hair",u:"#"}]},
+  {id:"m28",name:"Тревис Мур",city:"Austin",svc:"tattoo",photo:null,since:2018,works:610,rate:"4.8",
+   quote:"Эскиз, который нельзя объяснить словами, обычно и на коже не работает.",
+   bio:"Тату-мастер, американская классика и блэкворк. Одна большая работа в день, консультация обязательна.",
+   tags:["Traditional","Блэкворк","Крупные работы"],links:[{t:"instagram.com/moore.tattoo",u:"#"}]},
+  {id:"m29",name:"Рут Кальдера",city:"Boston",svc:"massage",photo:null,since:2021,works:980,rate:"4.9",
+   quote:"Спина студента и спина программиста болят по-разному.",
+   bio:"Массажист, работает с осанкой и последствиями сидячей работы. Половина клиентов приходит по направлению физиотерапевтов.",
+   tags:["Осанка","Глубокий","Реабилитация"],links:[{t:"ruthcaldera.com",u:"#"}]},
+  {id:"m30",name:"Джона Бек",city:"Denver",svc:"coach",photo:null,since:2019,works:1840,rate:"4.8",
+   quote:"На высоте нельзя обмануть подготовку — она видна на первом же подъёме.",
+   bio:"Тренер по выносливости, готовит к горным забегам и походам. Ведёт группы на открытом воздухе круглый год.",
+   tags:["Выносливость","Горы","Группы"],links:[{t:"beck.training",u:"#"}]},
+  {id:"m31",name:"Симона Уэйд",city:"Atlanta",svc:"brows",photo:null,since:2022,works:1650,rate:"5.0",
+   quote:"Брови задают лицо раньше, чем это делает макияж.",
+   bio:"Бровист, работает с плотными и фактурными бровями, которых боятся большинство мастеров. Ведёт обучение для салонов.",
+   tags:["Форма","Ламинирование","Обучение"],links:[{t:"instagram.com/simone.brows",u:"#"}]},
+  {id:"m32",name:"Райан Холт",city:"Dallas",svc:"stylist",photo:null,since:2020,works:470,rate:"4.8",
+   quote:"Костюм в Техасе должен работать и в офисе, и в сорок градусов.",
+   bio:"Персональный стилист, специализируется на деловом гардеробе и подгонке по фигуре. Работает с ателье, а не только с магазинами.",
+   tags:["Деловой","Подгонка","Капсулы"],links:[{t:"ryanholt.style",u:"#"}]},
+  {id:"m33",name:"Лена Ковальски",city:"Philadelphia",svc:"nails",photo:null,since:2023,works:720,rate:"4.9",
+   quote:"Клиент запоминает не дизайн, а то, что через месяц ничего не отслоилось.",
+   bio:"Мастер маникюра, аппаратная техника и работа с проблемными ногтями. Небольшой кабинет на двоих, без спешки.",
+   tags:["Аппаратный","Проблемные ногти","Уход"],links:[{t:"instagram.com/lena.nailroom",u:"#"}]},
+  {id:"m34",name:"Марко Дельгадо",city:"San Diego",svc:"barber",photo:null,since:2019,works:1980,rate:"4.9",
+   quote:"Утром перед работой у человека есть двадцать минут — в них всё и решается.",
+   bio:"Барбер, открывается в шесть утра для тех, кто стрижётся до смены. Классические стрижки и уход за бородой.",
+   tags:["Ранние часы","Классика","Борода"],links:[{t:"instagram.com/delgado.barber",u:"#"}]},
+  {id:"m35",name:"Пейтон Ривз",city:"Nashville",svc:"photo",photo:null,since:2021,works:530,rate:"4.9",
+   quote:"Музыканты фотографируются плохо ровно до тех пор, пока им не дать инструмент.",
+   bio:"Фотограф: съёмка для музыкантов и небольших студий. Работает на площадках и в репетиционных, а не только в павильоне.",
+   tags:["Музыканты","Репортаж","Портрет"],links:[{t:"peytonreeves.photo",u:"#"}]},
+  {id:"m36",name:"Ая Насири",city:"Las Vegas",svc:"makeup",photo:null,since:2022,works:1240,rate:"4.9",
+   quote:"Сценический макияж и свадебный — разные профессии, хотя кисти одни.",
+   bio:"Визажист: свадьбы и сценические образы. Выезжает на площадки и работает в жёстком графике по расписанию шоу.",
+   tags:["Свадебный","Сценический","Выезд"],links:[{t:"instagram.com/aya.makeup",u:"#"}]}
+];
+
+/* =======================================================================
+   ГЕОГРАФИЯ СЕТИ
+   -----------------------------------------------------------------------
+   Сейчас сеть работает только в США: поиск адресов, индексы и города
+   ограничены этой страной. Чтобы вернуть весь мир — поставьте
+   ONLY_COUNTRY = null и GEO_COUNTRIES = "" (ниже, в блоке поиска).
+   ======================================================================= */
+const ONLY_COUNTRY = "США";
+const HOME_VIEW = ONLY_COUNTRY ? {center:[39.5,-96.5], zoom:4} : {center:[30,10], zoom:2.5};
+
+const CITIES  = ONLY_COUNTRY ? ALL_CITIES.filter(c=>c.c===ONLY_COUNTRY) : ALL_CITIES;
+const MASTERS = ONLY_COUNTRY ? ALL_MASTERS.filter(m=>CITIES.some(c=>c.n===m.city)) : ALL_MASTERS;
+
+const CURATOR = "Отобран редакцией сети";
+const RADIUS_KM = 60, LABEL_ZOOM = 5, AVATAR_ZOOM = 4;
+
+/* =======================================================================
+   2. ВСПОМОГАТЕЛЬНОЕ
+   ======================================================================= */
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const svcName = id=>(SERVICES.find(s=>s.id===id)||{}).ru||'—';
+const cityByKey = k=>CITIES.find(c=>c.n===k);
+const mastersOf = k=>MASTERS.filter(m=>m.city===k);
+
+const TONES = ["#2A2622","#31352F","#3A3129","#2C3138","#38302E","#2E3430"];
+const initials = n=>n.split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+function avatar(m){
+  const tone = TONES[(m.id.charCodeAt(2)+m.name.length)%TONES.length];
+  const inner = m.photo ? `<img src="${esc(m.photo)}" alt="">` : `<span>${initials(m.name)}</span>`;
+  return `<div class="av" style="background:${tone}">${inner}</div>`;
+}
+function distKm(a,b,c,d){const R=6371,r=Math.PI/180,dLat=(c-a)*r,dLng=(d-b)*r;
+  const x=Math.sin(dLat/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin(dLng/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
+function nearestCity(lat,lng){let b=null,bd=Infinity;CITIES.forEach(c=>{const d=distKm(lat,lng,c.lat,c.lng);if(d<bd){bd=d;b=c}});return{city:b,km:bd}}
+
+function verdict(place){
+  if(!place.cityKey) return {k:"none",tag:"Города пока нет",
+    title:"Этого города ещё нет в сети",
+    text:"Мы открываем города по заявкам. Расскажите о себе — если наберётся спрос, запустим город и вернёмся к вам первыми."};
+  const city = cityByKey(place.cityKey);
+  if(city.s==="soon") return {k:"soon",tag:"Скоро запускаем",
+    title:"Город открываем в этом квартале",
+    text:"Заявка сейчас — это первая очередь на слот, когда город запустится."};
+  if(!place.svc) return {k:"free",tag:"Город открыт",
+    title:"Город работает — выберите услугу",
+    text:"Укажите свою услугу, и мы покажем, занят ли по ней слот именно в этом городе."};
+  const busy = mastersOf(city.n).find(m=>m.svc===place.svc);
+  if(busy) return {k:"busy",tag:"Слот занят",master:busy,
+    title:`«${svcName(place.svc)}» в городе уже занят`,
+    text:"Мы работаем с одним мастером на город по каждой услуге. Можем поставить вас в лист ожидания."};
+  return {k:"free",tag:"Слот свободен",
+    title:"Да, можем взять вас в продвижение",
+    text:`По услуге «${svcName(place.svc)}» в этом городе мастера ещё нет. Заявка закрепит слот за вами.`};
+}
+
+/* =======================================================================
+   3. КАРТА
+   ======================================================================= */
+const map = L.map('map',{zoomControl:false,minZoom:2,maxZoom:14,worldCopyJump:true,zoomSnap:.5}).setView(HOME_VIEW.center,HOME_VIEW.zoom);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_nolabels/{z}/{x}/{y}{r}.png',
+  {subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap · © CARTO'}).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_only_labels/{z}/{x}/{y}{r}.png',
+  {subdomains:'abcd',maxZoom:19,opacity:.75,attribution:''}).addTo(map);
+
+const cityMarkers=new Map(), mstrMarkers=new Map();
+
+CITIES.forEach(city=>{
+  const n = mastersOf(city.n).length;
+  const badge = n ? `<span class="city-badge">${n}</span>` : '';
+  const mk = L.marker([city.lat,city.lng],{
+    icon:L.divIcon({className:'',iconSize:[11,11],iconAnchor:[5.5,5.5],
+      html:`<div class="pin is-${city.s}"><div class="pin-dot"></div><span class="pin-label">${esc(city.ru)}</span>${badge}</div>`}),
+    title:city.ru}).addTo(map);
+  mk.on('click',()=>selectCity(city,true));
+  cityMarkers.set(city.n,mk);
+});
+
+const OFFSETS=[[0,-34],[36,-58],[-36,-58],[0,-84],[64,-32]];
+CITIES.forEach(city=>{
+  mastersOf(city.n).forEach((m,i)=>{
+    const [dx,dy]=OFFSETS[i%OFFSETS.length];
+    const mk=L.marker([city.lat,city.lng],{
+      icon:L.divIcon({className:'',iconSize:[40,40],iconAnchor:[20-dx,20-dy],
+        html:`<div class="mstr" data-m="${m.id}">${avatar(m)}<i class="mstr-svc"></i><span class="mstr-name">${esc(m.name)}</span></div>`}),
+      title:m.name,riseOnHover:true,zIndexOffset:500}).addTo(map);
+    mk.on('click',e=>{L.DomEvent.stopPropagation(e);openMaster(m,true)});
+    mstrMarkers.set(m.id,mk);
+  });
+});
+
+const reticle=$('#reticle');
+function updateReadout(){
+  const c=map.getCenter();
+  $('#r-lat').textContent=c.lat.toFixed(3);
+  $('#r-lng').textContent=(((c.lng+540)%360)-180).toFixed(3);
+  $('#r-z').textContent=map.getZoom().toFixed(1).replace('.0','');
+  document.body.classList.toggle('labels-on',map.getZoom()>=LABEL_ZOOM);
+  document.body.classList.toggle('avatars-off',map.getZoom()<AVATAR_ZOOM);
+}
+map.on('move zoom',updateReadout);
+map.on('movestart zoomstart',()=>reticle.classList.add('hot'));
+map.on('moveend zoomend',()=>reticle.classList.remove('hot'));
+updateReadout();
+$('#zin').onclick=()=>map.zoomIn(); $('#zout').onclick=()=>map.zoomOut();
+
+const toastEl=$('#toast');
+function toast(m){toastEl.textContent=m;toastEl.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>toastEl.classList.remove('on'),2600)}
+
+/* =======================================================================
+   4. СЧЁТЧИКИ
+   ======================================================================= */
+const liveCities=CITIES.filter(c=>c.s==='live');
+$('#n-mstr').textContent=MASTERS.length;
+$('#n-live').textContent=liveCities.length;
+$('#n-soon').textContent=CITIES.filter(c=>c.s==='soon').length;
+$('#s1').textContent=CITIES.length;
+$('#s2').textContent=MASTERS.length;
+$('#s3').textContent=liveCities.length*SERVICES.length-MASTERS.length;
+$('#foot-count').textContent=CITIES.length+' городов · '+MASTERS.length+' мастеров';
+
+const svcSel=$('#svc');
+svcSel.innerHTML=`<option value="">не выбрана</option>`+SERVICES.map(s=>`<option value="${s.id}">${s.ru}</option>`).join('');
+svcSel.onchange=()=>{ if(current) renderResult({...current,svc:svcSel.value}) };
+
+/* =======================================================================
+   5. ПАНЕЛЬ
+   ======================================================================= */
+const body=$('#panel-body'), qEl=$('#q'), sugEl=$('#suggest'), side=$('#side');
+let current=null, pickMarker=null;
+
+function clearSel(){
+  document.querySelectorAll('.pin.sel,.mstr.sel').forEach(e=>e.classList.remove('sel'));
+  if(pickMarker){map.removeLayer(pickMarker);pickMarker=null}
+}
+function closeSide(){side.classList.remove('on');side.innerHTML=''}
+
+function renderIdle(){
+  current=null; clearSel(); closeSide();
+  const feat=MASTERS.slice(0,6);
+  const free=liveCities.filter(c=>mastersOf(c.n).length===0).slice(0,6);
+  body.innerHTML=`
+    <div class="pad"><div class="sect-label"><span class="eyebrow">Мастера в сети</span></div></div>
+    ${feat.map(m=>{const c=cityByKey(m.city);return `
+      <button class="mrow" data-m="${m.id}">${avatar(m)}
+        <span><span class="mrow-name">${esc(m.name)}</span><br>
+        <span class="mrow-svc">${esc(svcName(m.svc))} · ${esc(c.ru)}</span></span>
+        <span class="mrow-go">Профиль</span></button>`}).join('')}
+    <div class="pad"><div class="sect-label"><span class="eyebrow">Города без мастеров</span></div></div>
+    ${free.map(c=>`
+      <button class="idle-row" data-city="${c.n}"><i class="dot live"></i>
+        <span><span class="idle-city">${esc(c.ru)}</span><br><span class="idle-country">${esc(c.c)} · охват ${esc(c.reach)}</span></span>
+        <span class="idle-status tag free">Все слоты свободны</span></button>`).join('')}
+    <div class="pad">
+      <p style="color:var(--slate);font-size:12.5px;margin:0 0 14px">Не нашли свой город? Всё равно оставьте заявку — города открываем по спросу.</p>
+      <button class="btn btn-ghost btn-block" data-apply-any>Оставить заявку без города</button>
+    </div>`;
+  body.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>openMaster(MASTERS.find(x=>x.id===b.dataset.m),true));
+  body.querySelectorAll('[data-city]').forEach(b=>b.onclick=()=>selectCity(cityByKey(b.dataset.city),true));
+  body.querySelector('[data-apply-any]').onclick=()=>openApply({name:'',cityKey:null,svc:svcSel.value});
+}
+
+function renderResult(place){
+  current=place;
+  const v=verdict(place);
+  const city=place.cityKey?cityByKey(place.cityKey):null;
+  const list=city?mastersOf(city.n):[];
+  const freeSvc=city&&city.s==='live'?SERVICES.filter(s=>!list.some(m=>m.svc===s.id)):[];
+  body.innerHTML=`
+    <div class="result-head">
+      <span class="eyebrow">Шаг 2 · Статус слота</span>
+      <h2 class="result-city">${esc(place.name)}</h2>
+      <p class="result-sub">${esc(place.country||'Координаты на карте')}${place.svc?' · '+esc(svcName(place.svc)):''}</p>
+      <div class="verdict ${v.k}">
+        <span class="tag ${v.k}">${v.tag}</span>
+        <h3>${v.title}</h3><p>${v.text}</p>
+      </div>
+    </div>
+    ${list.length?`
+      <div class="pad" style="padding-bottom:6px"><div class="sect-label"><span class="eyebrow">Мастера города · ${list.length}</span></div></div>
+      ${list.map(m=>`<button class="mrow" data-m="${m.id}">${avatar(m)}
+        <span><span class="mrow-name">${esc(m.name)}</span><br><span class="mrow-svc">${esc(svcName(m.svc))}</span></span>
+        <span class="mrow-go">Профиль</span></button>`).join('')}`:''}
+    <dl class="facts">
+      ${place.nearName?`<div class="fact"><dt>Ближайший город сети</dt><dd>${esc(place.nearName)}${place.nearKm>1?' · '+place.nearKm+' км':''}</dd></div>`:''}
+      ${city?`<div class="fact"><dt>Свободных услуг</dt><dd class="num">${freeSvc.length} из ${SERVICES.length}</dd></div>`:''}
+      ${place.reach?`<div class="fact"><dt>Месячный охват</dt><dd class="num">${esc(place.reach)}</dd></div>`:''}
+      <div class="fact"><dt>Координаты</dt><dd class="num">${place.lat.toFixed(3)}, ${place.lng.toFixed(3)}</dd></div>
+      <div class="fact"><dt>Ответ на заявку</dt><dd>до 2 рабочих дней</dd></div>
+    </dl>
+    <div class="pad">
+      <button class="btn btn-ink btn-block" data-apply>${v.k==='busy'?'Встать в лист ожидания':'Подать заявку'}</button>
+      <button class="btn btn-ghost btn-block" style="margin-top:9px" data-back>Вернуться к карте</button>
+    </div>`;
+  body.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>openMaster(MASTERS.find(x=>x.id===b.dataset.m),true));
+  body.querySelector('[data-apply]').onclick=()=>openApply(place);
+  body.querySelector('[data-back]').onclick=()=>{qEl.value='';renderIdle();map.flyTo(HOME_VIEW.center,HOME_VIEW.zoom,{duration:1})};
+  body.scrollTop=0;
+}
+
+/* =======================================================================
+   6. ВЫБОР
+   ======================================================================= */
+function selectCity(city,fly){
+  clearSel(); closeSide();
+  const mk=cityMarkers.get(city.n);
+  if(mk){const el=mk.getElement(); if(el) el.querySelector('.pin').classList.add('sel')}
+  if(fly) map.flyTo([city.lat,city.lng],Math.max(map.getZoom(),8),{duration:1.4});
+  renderResult({name:city.ru,country:city.c,lat:city.lat,lng:city.lng,cityKey:city.n,reach:city.reach,svc:svcSel.value});
+  sugEl.classList.remove('on');
+}
+function selectPoint(lat,lng,label,country){
+  const {city,km}=nearestCity(lat,lng);
+  if(km<=RADIUS_KM){selectCity(city,true);return}
+  clearSel(); closeSide();
+  pickMarker=L.marker([lat,lng],{icon:L.divIcon({className:'',iconSize:[14,14],iconAnchor:[7,7],
+    html:'<div style="width:14px;height:14px;border:1.5px solid #14110E;background:#FCFBF9;transform:rotate(45deg);box-shadow:0 0 0 3px rgba(252,251,249,.9)"></div>'})}).addTo(map);
+  map.flyTo([lat,lng],Math.max(map.getZoom(),8),{duration:1.4});
+  renderResult({name:label,country:country||'',lat,lng,cityKey:null,svc:svcSel.value});
+  sugEl.classList.remove('on');
+}
+
+/* =======================================================================
+   7. БОКОВАЯ КАРТОЧКА МАСТЕРА
+   ======================================================================= */
+function openMaster(m,fly){
+  const c=cityByKey(m.city);
+  document.querySelectorAll('.mstr.sel').forEach(e=>e.classList.remove('sel'));
+  const mk=mstrMarkers.get(m.id);
+  if(mk){const el=mk.getElement(); if(el) el.querySelector('.mstr').classList.add('sel')}
+  if(fly) map.flyTo([c.lat,c.lng],Math.max(map.getZoom(),8),{duration:1.4});
+
+  side.innerHTML=`
+    <div class="side-hero">
+      ${avatar(m)}
+      <button class="side-close" data-side-close aria-label="Закрыть">✕</button>
+      <div class="side-hero-txt">
+        <span class="eyebrow">${esc(c.ru)}, ${esc(c.c)}</span>
+        <h3>${esc(m.name)}</h3>
+      </div>
+    </div>
+    <div class="side-body">
+      <div class="chips">
+        <span class="tag plain">${esc(svcName(m.svc))}</span>
+        ${m.tags.slice(0,2).map(t=>`<span class="tag plain">${esc(t)}</span>`).join('')}
+      </div>
+      <div class="quote">«${esc(m.quote)}»
+        <div class="quote-by">${avatar(m)}<span class="eyebrow">${CURATOR}</span></div>
+      </div>
+      <p class="side-bio">${esc(m.bio)}</p>
+    </div>
+    <div class="side-foot">
+      <button class="btn btn-lime btn-block" data-full>Полный профиль</button>
+      <button class="btn btn-ghost btn-block" data-wait>Слот занят — в лист ожидания</button>
+    </div>`;
+  side.classList.add('on');
+  side.querySelector('[data-side-close]').onclick=()=>{closeSide();clearSel()};
+  side.querySelector('[data-full]').onclick=()=>openProfile(m);
+  side.querySelector('[data-wait]').onclick=()=>openApply({name:c.ru,country:c.c,lat:c.lat,lng:c.lng,cityKey:c.n,svc:m.svc});
+  svcSel.value=m.svc;
+  renderResult({name:c.ru,country:c.c,lat:c.lat,lng:c.lng,cityKey:c.n,reach:c.reach,svc:m.svc});
+}
+
+/* =======================================================================
+   8. ОВЕРЛЕИ
+   ======================================================================= */
+let lastFocus=null;
+function openOverlay(id){lastFocus=document.activeElement;$(id).classList.add('on');document.body.classList.add('locked')}
+function closeOverlay(id){
+  $(id).classList.remove('on');
+  if(!document.querySelector('.overlay.on')) document.body.classList.remove('locked');
+  if(lastFocus&&lastFocus.focus) lastFocus.focus();
+}
+document.querySelectorAll('.overlay').forEach(ov=>{
+  ov.addEventListener('click',e=>{ if(e.target.hasAttribute('data-close')) closeOverlay('#'+ov.id) });
+});
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape') return;
+  const open=document.querySelector('.overlay.on');
+  if(open) closeOverlay('#'+open.id);
+  else if(side.classList.contains('on')){closeSide();clearSel()}
+});
+
+/* --- полный профиль --- */
+function openProfile(m){
+  const c=cityByKey(m.city);
+  $('#pcard').innerHTML=`
+    <div class="pcard-hero">
+      ${avatar(m)}
+      <button class="icon-btn fav" data-fav aria-label="В избранное">♥</button>
+      <button class="icon-btn close" data-close-p aria-label="Закрыть">✕</button>
+      <div class="pcard-hero-txt">
+        <span class="eyebrow">${esc(c.ru)}, ${esc(c.c)}</span>
+        <h2>${esc(m.name)}</h2>
+      </div>
+    </div>
+    <div class="pcard-body">
+      <div class="pcard-row">
+        <span class="tag plain">${esc(svcName(m.svc))}</span>
+        ${m.tags.map(t=>`<span class="tag plain">${esc(t)}</span>`).join('')}
+        <button class="share" data-share>↗ Поделиться</button>
+      </div>
+      <div class="quote">«${esc(m.quote)}»
+        <div class="quote-by">${avatar(m)}<span class="eyebrow">${CURATOR}</span></div>
+      </div>
+      <div class="pcard-cta">
+        <button class="btn btn-lime" data-write>Написать мастеру</button>
+        <button class="btn btn-ghost" data-other>Занять слот в своём городе</button>
+      </div>
+      <div class="stats">
+        <div><span class="k num">${esc(m.rate)}</span><span class="v">рейтинг</span></div>
+        <div><span class="k num">${esc(String(m.works))}</span><span class="v">работ в сети</span></div>
+        <div><span class="k num">${esc(String(m.since))}</span><span class="v">в сети с</span></div>
+      </div>
+      <div class="pcard-sect"><span class="eyebrow">Описание</span><p>${esc(m.bio)}</p></div>
+      <div class="pcard-sect"><span class="eyebrow">Ссылки</span>
+        <div class="links">${m.links.map(l=>`<a class="link-chip" href="${esc(l.u)}" target="_blank" rel="noopener">↗ ${esc(l.t)}</a>`).join('')}</div>
+      </div>
+    </div>
+    <div class="pcard-note">
+      <span class="eyebrow">Слот «${esc(svcName(m.svc))}» в городе ${esc(c.ru)} занят</span>
+    </div>`;
+  const p=$('#pcard');
+  p.querySelector('[data-close-p]').onclick=()=>closeOverlay('#ov-profile');
+  p.querySelector('[data-fav]').onclick=e=>e.currentTarget.classList.toggle('on');
+  p.querySelector('[data-share]').onclick=()=>{
+    const url=location.href.split('#')[0]+'#'+m.id;
+    if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>toast('Ссылка скопирована'))}
+  };
+  p.querySelector('[data-write]').onclick=()=>toast('Здесь подключается чат или переход в профиль мастера');
+  p.querySelector('[data-other]').onclick=()=>{closeOverlay('#ov-profile');openApply({name:'',cityKey:null,svc:m.svc})};
+  openOverlay('#ov-profile');
+  p.scrollTop=0;
+}
+
+/* --- заявка --- */
+const PITCH=[
+  {t:"Один город — <em>один мастер.</em>",p:"Мы не сталкиваем вас с соседями по нише. Пока слот ваш, реклама в городе работает только на вас."},
+  {t:"Съёмка и тексты — <em>на нас.</em>",p:"Фотограф, монтаж, описание профиля и посадочная страница. От вас — работа, которую вы и так делаете каждый день."},
+  {t:"Заявка — <em>десять минут.</em>",p:"Заполните форму, мы посмотрим ваши работы и вернёмся с условиями по городу за два рабочих дня."}
+];
+let pitchIdx=0, pitchTimer=null, applyPlan='promo';
+
+function openApply(place){
+  const svc = place.svc || svcSel.value;
+  const c = place.cityKey ? cityByKey(place.cityKey) : null;
+  const v = verdict({...place,svc});
+  const waiting = v.k==='busy';
+
+  $('#acard').innerHTML=`
+    <div class="aside-visual">
+      <div class="av-top">
+        <span class="av-brand">ОХВАТ <i></i></span>
+        <span class="av-step num" id="av-step">01 / 0${PITCH.length}</span>
+      </div>
+      <h3 class="av-title" id="av-title"></h3>
+      <div class="av-slides" id="av-slides"></div>
+      <div class="av-dots" id="av-dots"></div>
+      <span class="av-foot">По заявке · отбор редакцией</span>
+      <svg class="av-map" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+        <circle cx="100" cy="100" r="96" stroke="#DCF24B" stroke-width=".6"/>
+        <circle cx="100" cy="100" r="66" stroke="#DCF24B" stroke-width=".6"/>
+        <circle cx="100" cy="100" r="34" stroke="#DCF24B" stroke-width=".6"/>
+        <path d="M4 100h192M100 4v192" stroke="#DCF24B" stroke-width=".6"/>
+      </svg>
+    </div>
+
+    <div class="aform">
+      <button class="icon-btn close aform-close" data-close-a aria-label="Закрыть">✕</button>
+      <span class="tag ${v.k}">${v.tag}</span>
+      <h2>${waiting?'Лист ожидания':'Заявка на слот'}</h2>
+      <p class="lede">${c?`Город ${esc(c.ru)}, ${esc(c.c)}.`:'Города пока нет в сети — расскажите о себе, мы откроем его по спросу.'} Ответим за два рабочих дня.</p>
+
+      <div class="two">
+        <div class="field"><label for="f-city">Город</label>
+          <input id="f-city" value="${esc(place.name||'')}" placeholder="Например, Казань"><span class="err">Укажите город</span></div>
+        <div class="field"><label for="f-svc">Ваша услуга</label>
+          <select id="f-svc">${SERVICES.map(s=>`<option value="${s.id}"${svc===s.id?' selected':''}>${s.ru}</option>`).join('')}</select></div>
+      </div>
+      <div class="two">
+        <div class="field"><label for="f-name">Имя и фамилия</label>
+          <input id="f-name" autocomplete="name" placeholder="Анна Петрова"><span class="err">Укажите, как к вам обращаться</span></div>
+        <div class="field"><label for="f-exp">Опыт, лет</label>
+          <input id="f-exp" inputmode="numeric" placeholder="5"></div>
+      </div>
+      <div class="field"><label for="f-link">Профиль или сайт с работами</label>
+        <input id="f-link" placeholder="instagram.com/…"><span class="err">Нам нужно увидеть ваши работы</span></div>
+      <div class="two">
+        <div class="field"><label for="f-email">Email</label>
+          <input id="f-email" type="email" autocomplete="email" placeholder="you@mail.com"><span class="err">Проверьте адрес — на него придёт ответ</span></div>
+        <div class="field"><label for="f-tg">Телефон или Telegram</label>
+          <input id="f-tg" placeholder="@nickname"></div>
+      </div>
+      <div class="field"><label for="f-about">Пара слов о себе</label>
+        <textarea id="f-about" placeholder="Чем отличаетесь, сколько клиентов в неделю, есть ли своя студия"></textarea></div>
+
+      <span class="eyebrow">Формат участия</span>
+      <div class="plans">
+        <button class="plan" data-plan="basic"><span class="pn">Базовое</span><span class="pt">Бесплатно</span>
+          <span class="pd">Профиль на карте и в каталоге, ссылка на ваши соцсети.</span></button>
+        <button class="plan on" data-plan="promo"><span class="pn">Промо-слот</span><span class="pt">По договорённости</span>
+          <span class="pd">Съёмка, тексты, реклама на город и закрепление слота за вами.</span></button>
+      </div>
+
+      <label class="consent"><input type="checkbox" id="f-ok">
+        Согласен на обработку контактных данных для ответа на заявку.</label>
+
+      <button class="btn btn-lime btn-block" id="submit">${waiting?'Встать в лист ожидания':'Отправить заявку'}</button>
+      <p class="fine">Мы смотрим все заявки вручную. Если слот в вашем городе освободится, напишем вам первыми.</p>
+    </div>`;
+
+  const a=$('#acard');
+  a.querySelector('[data-close-a]').onclick=()=>closeOverlay('#ov-apply');
+  a.querySelectorAll('.plan').forEach(b=>b.onclick=()=>{
+    a.querySelectorAll('.plan').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); applyPlan=b.dataset.plan;
+  });
+  a.querySelector('#submit').onclick=submitApply;
+  buildPitch();
+  openOverlay('#ov-apply');
+  setTimeout(()=>{const f=a.querySelector('#f-name'); if(f) f.focus()},80);
+}
+
+function buildPitch(){
+  const slides=$('#av-slides'), dots=$('#av-dots');
+  if(!slides) return;
+  slides.innerHTML=PITCH.map((s,i)=>`<div class="av-slide${i===0?' on':''}"><p>${s.p}</p></div>`).join('');
+  dots.innerHTML=PITCH.map((s,i)=>`<button data-i="${i}" class="${i===0?'on':''}" aria-label="Слайд ${i+1}"></button>`).join('');
+  dots.querySelectorAll('button').forEach(b=>b.onclick=()=>setPitch(+b.dataset.i));
+  setPitch(0);
+  clearInterval(pitchTimer);
+  pitchTimer=setInterval(()=>{ if($('#av-title')) setPitch((pitchIdx+1)%PITCH.length); else clearInterval(pitchTimer) },5200);
+}
+function setPitch(i){
+  pitchIdx=i;
+  const t=$('#av-title'); if(!t) return;
+  t.innerHTML=PITCH[i].t;
+  $('#av-step').textContent='0'+(i+1)+' / 0'+PITCH.length;
+  document.querySelectorAll('.av-slide').forEach((s,j)=>s.classList.toggle('on',j===i));
+  document.querySelectorAll('.av-dots button').forEach((d,j)=>d.classList.toggle('on',j===i));
+}
+
+function submitApply(){
+  const need=['f-city','f-name','f-link','f-email'];
+  let ok=true;
+  need.forEach(id=>{
+    const el=document.getElementById(id);
+    const bad=!el.value.trim()||(id==='f-email'&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(el.value));
+    el.closest('.field').classList.toggle('invalid',bad);
+    if(bad&&ok){el.focus();ok=false}
+  });
+  if(!document.getElementById('f-ok').checked){ if(ok) toast('Отметьте согласие на обработку данных'); return }
+  if(!ok) return;
+
+  const payload={
+    city:document.getElementById('f-city').value.trim(),
+    service:document.getElementById('f-svc').value,
+    name:document.getElementById('f-name').value.trim(),
+    experience:document.getElementById('f-exp').value.trim(),
+    link:document.getElementById('f-link').value.trim(),
+    email:document.getElementById('f-email').value.trim(),
+    contact:document.getElementById('f-tg').value.trim(),
+    about:document.getElementById('f-about').value.trim(),
+    plan:applyPlan, ts:new Date().toISOString()
+  };
+  /* ⬇⬇ СЮДА ПОДКЛЮЧАЕТСЯ БЭКЕНД:
+     fetch('/api/leads',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}) */
+  console.log('Заявка:',payload);
+
+  const ticket='ОХВ-'+String(Date.now()).slice(-6);
+  clearInterval(pitchTimer);
+  $('#acard').querySelector('.aform').innerHTML=`
+    <button class="icon-btn close aform-close" data-close-a aria-label="Закрыть">✕</button>
+    <div class="done">
+      <div class="seal"><svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+        <path d="M4 12.5 9.5 18 20 6.5" stroke="#14110E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h3>Заявка принята</h3>
+      <p>Ответим на ${esc(payload.email)} за два рабочих дня и пришлём условия по услуге «${esc(svcName(payload.service))}» в городе ${esc(payload.city)}.</p>
+      <div class="ticket">${ticket}</div><br>
+      <button class="btn btn-ghost" data-close-a>Вернуться к карте</button>
+    </div>`;
+  $('#acard').querySelectorAll('[data-close-a]').forEach(b=>b.onclick=()=>closeOverlay('#ov-apply'));
+  toast('Заявка отправлена · '+ticket);
+}
+
+/* =======================================================================
+   9. ПОИСК — города, ZIP и полные адреса США
+   -----------------------------------------------------------------------
+   Работают два геокодера. Вставьте токен Mapbox ниже — сайт переключится
+   на него автоматически. Пустая строка = остаётся бесплатный Nominatim.
+
+   Токен берётся на mapbox.com → Account → Tokens. Обязательно ограничьте
+   его своим доменом (URL restrictions), иначе им смогут пользоваться
+   посторонние за ваш счёт.
+   ======================================================================= */
+const MAPBOX_TOKEN = "";   // ← сюда токен вида "pk.eyJ1Ijoi..."
+
+const GEO = {
+  countries:'us',    // коды стран через запятую; пустая строка — весь мир
+  lang:'ru',
+  minChars:3,        // с какой длины запроса идём в геокодер
+  debounce:550,      // пауза после набора, мс
+  limit:5            // сколько адресов показывать
+};
+const PROVIDER = MAPBOX_TOKEN ? 'mapbox' : 'nominatim';
+if(PROVIDER==='mapbox') map.attributionControl.addAttribution('© Mapbox');
+
+let geoTimer=null, geoAbort=null, remoteHits=[];
+
+function isPostal(v){ return GEO.countries==='us' ? /^[0-9]{5}(-[0-9]{4})?$/.test(v.trim()) : /^[0-9]{4,6}(-[0-9]{4})?$/.test(v.trim()) }
+/* адрес: есть цифры и слово, либо запятая */
+function looksLikeAddress(v){
+  const s=v.trim();
+  if(isPostal(s)) return false;
+  return (/\d/.test(s) && /[a-zA-Zа-яА-ЯёЁ]{3,}/.test(s)) || s.includes(',');
+}
+
+/* ---------- нормализация ответов: оба геокодера отдают один формат ----------
+   {lat, lng, title, sub, precise}                                            */
+function normMapbox(f){
+  const p=f.properties||{};
+  const co=p.coordinates||{};
+  return {
+    lat: co.latitude ?? f.geometry.coordinates[1],
+    lng: co.longitude ?? f.geometry.coordinates[0],
+    title: p.name || p.name_preferred || (p.full_address||'').split(',')[0],
+    sub: p.place_formatted || p.full_address || '',
+    precise: p.feature_type==='address'
+  };
+}
+function normNominatim(p){
+  const a=p.address||{};
+  const line1=[a.road||a.pedestrian||a.neighbourhood||p.name, a.house_number].filter(Boolean).join(', ');
+  const city=a.city||a.town||a.village||a.municipality||a.county||a.state||'';
+  return {
+    lat: parseFloat(p.lat), lng: parseFloat(p.lon),
+    title: line1 || (p.display_name||'').split(',')[0],
+    sub: [city,a.country].filter(Boolean).join(', '),
+    precise: !!a.house_number
+  };
+}
+
+/* ---------- прямой поиск ---------- */
+async function geocode(q,limit){
+  if(geoAbort) geoAbort.abort();
+  geoAbort=new AbortController();
+  const opts={signal:geoAbort.signal};
+  const query=q.trim();
+
+  if(PROVIDER==='mapbox'){
+    const p=new URLSearchParams({q:query,limit:String(limit),language:GEO.lang,
+      autocomplete:'true',access_token:MAPBOX_TOKEN});
+    if(GEO.countries) p.set('country',GEO.countries);
+    const r=await fetch(`https://api.mapbox.com/search/geocode/v6/forward?${p}`,opts);
+    if(!r.ok) throw new Error('mapbox '+r.status);
+    const j=await r.json();
+    return (j.features||[]).map(normMapbox);
+  }
+
+  const p=new URLSearchParams({format:'jsonv2',addressdetails:'1',limit:String(limit),'accept-language':GEO.lang});
+  if(GEO.countries) p.set('countrycodes',GEO.countries);
+  if(isPostal(query)) p.set('postalcode',query); else p.set('q',query);
+  const r=await fetch(`https://nominatim.openstreetmap.org/search?${p}`,opts);
+  if(!r.ok) throw new Error('nominatim '+r.status);
+  return (await r.json()).map(normNominatim);
+}
+
+/* ---------- обратный поиск: клик по карте ---------- */
+async function reverseGeocode(lat,lng){
+  if(PROVIDER==='mapbox'){
+    const p=new URLSearchParams({longitude:String(lng),latitude:String(lat),
+      language:GEO.lang,access_token:MAPBOX_TOKEN,types:'place'});
+    const r=await fetch(`https://api.mapbox.com/search/geocode/v6/reverse?${p}`);
+    const j=await r.json();
+    return j.features && j.features.length ? normMapbox(j.features[0]) : null;
+  }
+  const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&accept-language=${GEO.lang}&lat=${lat}&lon=${lng}`);
+  const j=await r.json();
+  return j && j.address ? normNominatim(j) : null;
+}
+
+function localMatches(v){
+  const s=v.trim().toLowerCase(); if(!s) return [];
+  return CITIES.filter(c=>c.ru.toLowerCase().includes(s)||c.n.toLowerCase().includes(s)).slice(0,5);
+}
+
+function renderSuggest(){
+  const cities=localMatches(qEl.value);
+  if(!cities.length && !remoteHits.length){sugEl.classList.remove('on');sugEl.innerHTML='';return}
+  let html='';
+  if(cities.length){
+    html+=`<div class="sug-group"><span class="eyebrow">Города сети</span></div>`;
+    html+=cities.map(c=>{
+      const n=mastersOf(c.n).length;
+      return `<button class="suggest-item" data-city="${c.n}"><i class="dot ${c.s}"></i>
+        <span class="suggest-name">${esc(c.ru)} <span style="color:var(--slate)">· ${esc(c.c)}</span></span>
+        <span class="suggest-meta">${c.s==='soon'?'Скоро':(n?n+' маст.':'Свободно')}</span></button>`}).join('');
+  }
+  if(remoteHits.length){
+    html+=`<div class="sug-group"><span class="eyebrow">Адреса</span></div>`;
+    html+=remoteHits.map((h,i)=>`
+      <button class="suggest-item addr" data-hit="${i}">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M8 15s5-4.7 5-8.4A5 5 0 0 0 3 6.6C3 10.3 8 15 8 15Z" stroke="currentColor" stroke-width="1.3"/>
+          <circle cx="8" cy="6.5" r="1.7" stroke="currentColor" stroke-width="1.3"/></svg>
+        <span class="suggest-name">${esc(h.title)}<br><span class="suggest-sub">${esc(h.sub)}</span></span>
+        ${h.precise?'<span class="suggest-meta">Точно</span>':''}</button>`).join('');
+  }
+  sugEl.innerHTML=html;
+  sugEl.querySelectorAll('[data-city]').forEach(b=>b.onclick=()=>{
+    const c=cityByKey(b.dataset.city); qEl.value=c.ru; selectCity(c,true)});
+  sugEl.querySelectorAll('[data-hit]').forEach(b=>b.onclick=()=>{
+    const h=remoteHits[+b.dataset.hit];
+    qEl.value=h.title+(h.sub?', '+h.sub:'');
+    selectAddress(h);
+  });
+  sugEl.classList.add('on');
+}
+
+function scheduleRemote(){
+  clearTimeout(geoTimer);
+  const v=qEl.value.trim();
+  if(v.length<GEO.minChars || (!looksLikeAddress(v) && !isPostal(v))){ remoteHits=[]; renderSuggest(); return }
+  geoTimer=setTimeout(async()=>{
+    try{ remoteHits=await geocode(v,GEO.limit) }
+    catch(e){ if(e.name!=='AbortError') remoteHits=[] }
+    renderSuggest();
+  },GEO.debounce);
+}
+
+/* точка на карте: остаёмся ровно на адресе, к центру города не смещаемся */
+function selectAddress(h){
+  clearSel(); closeSide();
+  pickMarker=L.marker([h.lat,h.lng],{icon:L.divIcon({className:'',iconSize:[16,16],iconAnchor:[8,8],
+    html:'<div class="pick"></div>'})}).addTo(map);
+  map.flyTo([h.lat,h.lng], h.precise?16:12, {duration:1.6});
+  const near=nearestCity(h.lat,h.lng);
+  const inNet=near.km<=RADIUS_KM;
+  renderResult({
+    name:h.title, country:h.sub||'', lat:h.lat, lng:h.lng,
+    cityKey: inNet?near.city.n:null,
+    reach: inNet?near.city.reach:null,
+    svc:svcSel.value,
+    addr:true, nearName: inNet?near.city.ru:null, nearKm: Math.round(near.km)
+  });
+  sugEl.classList.remove('on');
+}
+
+async function runSearch(){
+  const v=qEl.value.trim(); if(!v){qEl.focus();return}
+  const local=localMatches(v);
+  const exact=local.find(c=>c.ru.toLowerCase()===v.toLowerCase()||c.n.toLowerCase()===v.toLowerCase());
+  if(exact){selectCity(exact,true);return}
+  if(remoteHits.length){ selectAddress(remoteHits[0]); return }
+  if(local.length===1){selectCity(local[0],true);return}
+  toast('Ищем «'+v+'»…');
+  try{
+    const hits=await geocode(v,1);
+    if(!hits.length){
+      if(local.length){selectCity(local[0],true);return}
+      toast(ONLY_COUNTRY==='США'
+        ? 'Ищем только по США. Добавьте город: «440 E 89th St, New York»'
+        : 'Не нашли адрес — попробуйте добавить город');
+      return;
+    }
+    selectAddress(hits[0]);
+  }catch(e){
+    if(e.name==='AbortError') return;
+    if(local.length){selectCity(local[0],true);return}
+    toast('Поиск недоступен — выберите город на карте');
+  }
+}
+
+qEl.addEventListener('input',()=>{renderSuggest();scheduleRemote()});
+qEl.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){e.preventDefault();sugEl.classList.remove('on');runSearch()}
+  if(e.key==='Escape')sugEl.classList.remove('on');
+});
+qEl.addEventListener('focus',renderSuggest);
+document.addEventListener('click',e=>{if(!e.target.closest('.search'))sugEl.classList.remove('on')});
+$('#go').onclick=runSearch;
+document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{qEl.value=b.dataset.ex;remoteHits=[];runSearch()});
+
+let clickLock=false;
+map.on('click',async e=>{
+  if(clickLock) return; clickLock=true; setTimeout(()=>clickLock=false,700);
+  const {lat,lng}=e.latlng;
+  const near=nearestCity(lat,lng);
+  if(near.km<=RADIUS_KM){selectCity(near.city,true);return}
+  toast('Определяем место…');
+  try{
+    const h=await reverseGeocode(lat,lng);
+    selectPoint(lat,lng, h && h.title ? h.title : 'Точка на карте', h ? h.sub : '');
+  }catch(err){ selectPoint(lat,lng,'Точка на карте','') }
+});
+
+$('#cta-top').onclick=()=>openApply(current||{name:'',cityKey:null,svc:svcSel.value});
+$('#nav-open').onclick=e=>{e.preventDefault();qEl.value='';renderIdle();map.flyTo(HOME_VIEW.center,HOME_VIEW.zoom,{duration:1.2})};
+$('#nav-map').onclick=e=>e.preventDefault();
+window.addEventListener('resize',()=>map.invalidateSize());
+renderIdle();
+setTimeout(()=>map.invalidateSize(),200);
+</script>
+</body>
+</html>
