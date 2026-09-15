@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#FCFBF9">
-<title>Карта сети · Найдите свой город · ОХВАТ</title>
+<title>Карта сети · Найдите свой город · local host</title>
 <meta name="description" content="Интерактивная карта сети мастеров. Найдите город и услугу — узнайте, свободен ли слот, и подайте заявку.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -85,6 +85,12 @@ button{font:inherit;color:inherit}
   text-decoration:none;padding:8px 13px;border-radius:999px;border:1px solid transparent}
 .topnav a:hover{border-color:var(--rule-2);background:var(--vellum)}
 .topnav a.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.langs{display:flex;gap:2px;border:1px solid var(--rule-2);border-radius:999px;padding:2px;background:var(--card)}
+.lang-btn{border:0;background:transparent;cursor:pointer;border-radius:999px;padding:6px 11px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--slate);transition:.15s}
+.lang-btn:hover{color:var(--ink)}
+.lang-btn.on{background:var(--ink);color:var(--paper)}
+@media (max-width:560px){.langs{padding:1px}.lang-btn{padding:5px 8px;font-size:9px}}
 
 /* ==========================================================
    СЦЕНА
@@ -122,6 +128,7 @@ button{font:inherit;color:inherit}
 .suggest-name{font-size:14px}
 .suggest-meta{margin-left:auto;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate)}
 .sug-group{padding:10px 14px 6px;border-bottom:1px solid var(--rule);background:var(--vellum)}
+.sug-busy{padding:14px;text-align:center}
 .suggest-item.addr{align-items:flex-start}
 .suggest-item.addr svg{margin-top:3px;flex:none;color:var(--slate)}
 .suggest-sub{font-size:11.5px;color:var(--slate)}
@@ -193,7 +200,7 @@ button{font:inherit;color:inherit}
 .leaflet-control-attribution{background:rgba(252,251,249,.86)!important;font-family:var(--mono);font-size:9px!important;color:var(--slate)!important;padding:2px 8px!important}
 .leaflet-control-attribution a{color:var(--ink-2)!important}
 
-.reticle{position:absolute;left:50%;top:50%;width:118px;height:118px;transform:translate(-50%,-50%);pointer-events:none;z-index:410;opacity:.45;transition:opacity .3s,transform .3s}
+.reticle{position:absolute;left:50%;top:50%;width:118px;height:118px;transform:translate(-50%,-50%);pointer-events:none;z-index:410;opacity:.45;transition:opacity .3s,transform .3s; display:none}
 .reticle.hot{opacity:1;transform:translate(-50%,-50%) scale(1.06)}
 .reticle span{position:absolute;background:var(--ink)}
 .reticle .h{left:0;right:0;top:50%;height:1px;opacity:.28}
@@ -465,24 +472,29 @@ button{font:inherit;color:inherit}
 
 <header class="topbar">
   <div class="brand">
-    <span class="brand-mark">ОХВАТ</span><i class="brand-dot"></i>
-    <span class="brand-sub">сеть продвигаемых мастеров</span>
+    <span class="brand-mark" data-i18n="brandName"></span><i class="brand-dot"></i>
+    <span class="brand-sub" data-i18n="brandSub"></span>
   </div>
   <nav class="topnav">
-    <a href="#" class="on" id="nav-map">Карта</a>
-    <a href="#how">Как это работает</a>
-    <a href="#" id="nav-open">Свободные города</a>
+    <a href="#" class="on" id="nav-map" data-i18n="navMap"></a>
+    <a href="#how" data-i18n="navHow"></a>
+    <a href="#" id="nav-open" data-i18n="navFree"></a>
   </nav>
-  <button class="btn btn-ink" id="cta-top">Подать заявку</button>
+  <div class="langs">
+    <button class="lang-btn" data-lang="en">EN</button>
+    <button class="lang-btn" data-lang="es">ES</button>
+    <button class="lang-btn" data-lang="ru">RU</button>
+  </div>
+  <button class="btn btn-ink" id="cta-top" data-i18n="cta"></button>
 </header>
 
 <main class="stage">
 
   <aside class="panel">
     <div class="panel-head">
-      <span class="eyebrow">Шаг 1 · Город и услуга</span>
-      <h1 class="panel-title">Где вы <em>работаете?</em></h1>
-      <p class="panel-lede">Введите адрес, город или индекс и выберите свою услугу — покажем, свободен ли слот.</p>
+      <span class="eyebrow" data-i18n="step1"></span>
+      <h1 class="panel-title" data-i18n-html="whereTitle"></h1>
+      <p class="panel-lede" data-i18n="lede"></p>
 
       <div class="search">
         <div class="search-field">
@@ -490,13 +502,13 @@ button{font:inherit;color:inherit}
             <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4"/>
             <path d="M10.8 10.8 14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
           </svg>
-          <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Адрес, город или индекс / ZIP" aria-label="Адрес, город или почтовый индекс">
-          <button class="search-go" id="go">Найти</button>
+          <input id="q" type="text" autocomplete="off" spellcheck="false" data-i18n-ph="phQuery" data-i18n-aria="phQuery">
+          <button class="search-go" id="go" data-i18n="btnFind"></button>
         </div>
         <div class="suggest" id="suggest" role="listbox" aria-label="Подсказки"></div>
         <div class="svc-row">
-          <label class="eyebrow" for="svc">Услуга</label>
-          <select id="svc" aria-label="Ваша услуга"></select>
+          <label class="eyebrow" for="svc" data-i18n="lblService"></label>
+          <select id="svc" data-i18n-aria="lblService"></select>
         </div>
         <div class="search-hint">
           <button class="chip" data-ex="440 E 89th St, New York">440 E 89th St</button>
@@ -510,7 +522,7 @@ button{font:inherit;color:inherit}
     <div class="panel-body" id="panel-body"></div>
 
     <div class="panel-foot">
-      <span class="eyebrow">Или тапните точку на карте</span>
+      <span class="eyebrow" data-i18n="footTap"></span>
       <span class="eyebrow num" id="foot-count">—</span>
     </div>
   </aside>
@@ -523,9 +535,9 @@ button{font:inherit;color:inherit}
     </div>
 
     <div class="legend">
-      <div class="legend-row"><i class="legend-av"></i> Мастер в сети <span class="legend-n" id="n-mstr">—</span></div>
-      <div class="legend-row"><i class="dot live"></i> Город открыт <span class="legend-n" id="n-live">—</span></div>
-      <div class="legend-row"><i class="dot soon"></i> Скоро запускаем <span class="legend-n" id="n-soon">—</span></div>
+      <div class="legend-row"><i class="legend-av"></i> <span data-i18n="legMaster"></span> <span class="legend-n" id="n-mstr">—</span></div>
+      <div class="legend-row"><i class="dot live"></i> <span data-i18n="legLive"></span> <span class="legend-n" id="n-live">—</span></div>
+      <div class="legend-row"><i class="dot soon"></i> <span data-i18n="legSoon"></span> <span class="legend-n" id="n-soon">—</span></div>
     </div>
 
     <div class="zoomer">
@@ -534,9 +546,9 @@ button{font:inherit;color:inherit}
     </div>
 
     <div class="readout" id="readout">
-      <span><b>ШИР</b> <span id="r-lat">00.000</span></span>
-      <span><b>ДОЛ</b> <span id="r-lng">00.000</span></span>
-      <span><b>МСШТ</b> <span id="r-z">3</span></span>
+      <span><b data-i18n="roLat"></b> <span id="r-lat">00.000</span></span>
+      <span><b data-i18n="roLng"></b> <span id="r-lng">00.000</span></span>
+      <span><b data-i18n="roZoom"></b> <span id="r-z">3</span></span>
     </div>
 
     <aside class="side" id="side" aria-live="polite"></aside>
@@ -545,28 +557,25 @@ button{font:inherit;color:inherit}
 </main>
 
 <section class="strip">
-  <div><span class="k num" id="s1">—</span><span class="v">городов на карте</span></div>
-  <div><span class="k num" id="s2">—</span><span class="v">мастеров в сети</span></div>
-  <div><span class="k num" id="s3">—</span><span class="v">свободных слотов</span></div>
-  <div><span class="k num">2</span><span class="v">рабочих дня на ответ</span></div>
+  <div><span class="k num" id="s1">—</span><span class="v" data-i18n="stCities"></span></div>
+  <div><span class="k num" id="s2">—</span><span class="v" data-i18n="stMasters"></span></div>
+  <div><span class="k num" id="s3">—</span><span class="v" data-i18n="stFree"></span></div>
+  <div><span class="k num">2</span><span class="v" data-i18n="stDays"></span></div>
 </section>
 
 <section class="how" id="how">
-  <span class="eyebrow">Порядок действий</span>
-  <h2>Один город, одна услуга — <em>один мастер</em></h2>
+  <span class="eyebrow" data-i18n="howEyebrow"></span>
+  <h2 data-i18n-html="howTitle"></h2>
   <div class="steps">
-    <div class="step"><span class="step-n">01 — ПОИСК</span><h3>Найдите город</h3>
-      <p>Введите название или индекс, либо тапните точку на карте. Аватары на карте — мастера, которых мы уже продвигаем.</p></div>
-    <div class="step"><span class="step-n">02 — ПРОВЕРКА</span><h3>Проверьте слот по услуге</h3>
-      <p>Выберите свою услугу: если в городе по ней ещё нет мастера — слот ваш. Если есть — откроется его профиль.</p></div>
-    <div class="step"><span class="step-n">03 — ЗАЯВКА</span><h3>Заполните заявку</h3>
-      <p>Форма открывается прямо поверх карты. Отвечаем за два рабочих дня и присылаем условия по городу.</p></div>
+    <div class="step"><span class="step-n" data-i18n="s1n"></span><h3 data-i18n="s1h"></h3><p data-i18n="s1p"></p></div>
+    <div class="step"><span class="step-n" data-i18n="s2n"></span><h3 data-i18n="s2h"></h3><p data-i18n="s2p"></p></div>
+    <div class="step"><span class="step-n" data-i18n="s3n"></span><h3 data-i18n="s3h"></h3><p data-i18n="s3p"></p></div>
   </div>
 </section>
 
 <footer class="foot" id="foot">
-  <span class="eyebrow">ОХВАТ · сеть продвигаемых мастеров · 2026</span>
-  <a href="#">hello@example.com</a><a href="#">Telegram</a><a href="#">Политика конфиденциальности</a>
+  <span class="eyebrow" data-i18n="footTag"></span>
+  <a href="#">hello@example.com</a><a href="#">Telegram</a><a href="#" data-i18n="footPolicy"></a>
 </footer>
 
 <div class="overlay" id="ov-profile"><div class="scrim" data-close></div><div class="pcard" id="pcard" role="dialog" aria-modal="true" aria-label="Профиль мастера"></div></div>
@@ -578,9 +587,16 @@ button{font:inherit;color:inherit}
    1. ДАННЫЕ
    ======================================================================= */
 const SERVICES = [
-  {id:"barber",ru:"Барбер"},{id:"tattoo",ru:"Тату-мастер"},{id:"nails",ru:"Мастер маникюра"},
-  {id:"brows",ru:"Бровист"},{id:"hair",ru:"Колорист"},{id:"makeup",ru:"Визажист"},
-  {id:"photo",ru:"Фотограф"},{id:"coach",ru:"Фитнес-тренер"},{id:"massage",ru:"Массажист"},{id:"stylist",ru:"Стилист"}
+  {id:"barber", ru:"Барбер",           en:"Barber",          es:"Barbero"},
+  {id:"tattoo", ru:"Тату-мастер",      en:"Tattoo artist",   es:"Tatuador"},
+  {id:"nails",  ru:"Мастер маникюра",  en:"Nail tech",       es:"Manicurista"},
+  {id:"brows",  ru:"Бровист",          en:"Brow artist",     es:"Especialista en cejas"},
+  {id:"hair",   ru:"Колорист",         en:"Colourist",       es:"Colorista"},
+  {id:"makeup", ru:"Визажист",         en:"Makeup artist",   es:"Maquillador"},
+  {id:"photo",  ru:"Фотограф",         en:"Photographer",    es:"Fotógrafo"},
+  {id:"coach",  ru:"Фитнес-тренер",    en:"Fitness coach",   es:"Entrenador"},
+  {id:"massage",ru:"Массажист",        en:"Massage therapist",es:"Masajista"},
+  {id:"stylist",ru:"Стилист",          en:"Stylist",         es:"Estilista"}
 ];
 
 /* s: "live" — город открыт | "soon" — запускаем */
@@ -828,20 +844,280 @@ const ALL_MASTERS = [
    ONLY_COUNTRY = null и GEO_COUNTRIES = "" (ниже, в блоке поиска).
    ======================================================================= */
 const ONLY_COUNTRY = "США";
+
+/* =======================================================================
+   SUPABASE — заполните два поля, и сайт начнёт работать с базой.
+   Пусто = работает на демо-данных из этого файла.
+   Ключ берётся в Project Settings → API → anon public. Это публичный
+   ключ только для чтения витрины и отправки заявок, он безопасен.
+   ======================================================================= */
+const SUPABASE = { url:"https://tgukguvlunjyiwcdccgs.supabase.co", anonKey:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRndWtndXZsdW5qeWl3Y2RjY2dzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0MTcxMDgsImV4cCI6MjEwMjk5MzEwOH0.AVInjkMsYXcDRXyDmMMt2On3fqgIG1IjJev2B0sy_LA" };;
+const DB = !!(SUPABASE.url && SUPABASE.anonKey);
+const RADIUS_MI_DEFAULT = 15;   // радиус эксклюзива по умолчанию, мили
+const MI_PER_KM = 0.621371;
+
 const HOME_VIEW = ONLY_COUNTRY ? {center:[39.5,-96.5], zoom:4} : {center:[30,10], zoom:2.5};
 
-const CITIES  = ONLY_COUNTRY ? ALL_CITIES.filter(c=>c.c===ONLY_COUNTRY) : ALL_CITIES;
-const MASTERS = ONLY_COUNTRY ? ALL_MASTERS.filter(m=>CITIES.some(c=>c.n===m.city)) : ALL_MASTERS;
+let CITIES  = ONLY_COUNTRY ? ALL_CITIES.filter(c=>c.c===ONLY_COUNTRY) : ALL_CITIES;
+let MASTERS = ONLY_COUNTRY ? ALL_MASTERS.filter(m=>CITIES.some(c=>c.n===m.city)) : ALL_MASTERS;
+
+/* демо-мастера привязаны к городу — даём им координаты и радиус */
+function hydrateMasters(){
+  MASTERS.forEach(m=>{
+    if(m.lat==null || m.lng==null){
+      const c=CITIES.find(x=>x.n===m.city);
+      if(c){ m.lat=c.lat; m.lng=c.lng }
+    }
+    if(m.radius_mi==null) m.radius_mi=RADIUS_MI_DEFAULT;
+  });
+  MASTERS=MASTERS.filter(m=>m.lat!=null);
+}
+hydrateMasters();
+
+/* ---------- загрузка из базы ---------- */
+async function api(path){
+  const r=await fetch(`${SUPABASE.url}/rest/v1/${path}`,
+    {headers:{apikey:SUPABASE.anonKey,Authorization:'Bearer '+SUPABASE.anonKey}});
+  if(!r.ok) throw new Error('supabase '+r.status+' '+path);
+  return r.json();
+}
+async function loadFromDB(){
+  const [cities,masters]=await Promise.all([
+    api('cities?select=*&active=eq.true'),
+    api('masters_public?select=*')
+  ]);
+  if(cities.length){
+    CITIES=cities.map(c=>({n:c.key,ru:c.name_ru,c:c.country,lat:c.lat,lng:c.lng,s:c.status,reach:c.reach}));
+  }
+  MASTERS=masters.map(m=>({
+    id:'db'+m.id, name:m.name, svc:m.service, city:m.city_key,
+    lat:m.lat, lng:m.lng, radius_mi:Number(m.radius_mi)||RADIUS_MI_DEFAULT,
+    photo:m.photo_url||null, since:m.since_year, works:m.works, rate:m.rating,
+    quote:m.quote||'', bio:m.bio||'', tags:m.tags||[], links:m.links||[],
+    slot_until:m.slot_until
+  }));
+  buildMarkers();
+  refreshCounters();
+  renderIdle();
+  console.info('[база] загружено:',CITIES.length,'городов,',MASTERS.length,'мастеров');
+}
 
 const CURATOR = "Отобран редакцией сети";
 const RADIUS_KM = 60, LABEL_ZOOM = 5, AVATAR_ZOOM = 4;
+
+/* =======================================================================
+   ЯЗЫКИ. Добавить новый — допишите блок по образцу и кнопку в шапке.
+   ======================================================================= */
+const I18N = {
+ru:{
+ close:"Закрыть", fav:"В избранное", brandName:"local host", geo401:"Mapbox: неверный токен (401)", geo403:"Mapbox: домен не разрешён в настройках токена (403)", geo422:"Mapbox: запрос не распознан (422)",
+ brandSub:"сеть продвигаемых мастеров", navMap:"Карта", navHow:"Как это работает", navFree:"Свободные города", cta:"Подать заявку",
+ step1:"Шаг 1 · Город и услуга", whereTitle:"Где вы <em>работаете?</em>",
+ lede:"Введите адрес, город или индекс и выберите свою услугу — покажем, свободен ли слот.",
+ phQuery:"Адрес, город или индекс / ZIP", btnFind:"Найти", lblService:"Услуга", svcNone:"не выбрана",
+ footTap:"Или тапните точку на карте", uCities:"городов", uMasters:"мастеров",
+ legMaster:"Мастер в сети", legLive:"Город открыт", legSoon:"Скоро запускаем",
+ roLat:"ШИР", roLng:"ДОЛ", roZoom:"МСШТ",
+ stCities:"городов на карте", stMasters:"мастеров в сети", stFree:"свободных слотов", stDays:"рабочих дня на ответ",
+ howEyebrow:"Порядок действий", howTitle:"Одна зона, одна услуга — <em>один мастер</em>",
+ s1n:"01 — ПОИСК", s1h:"Найдите свой адрес", s1p:"Введите адрес, город или индекс, либо тапните точку на карте. Аватары — мастера, которых мы уже продвигаем.",
+ s2n:"02 — ПРОВЕРКА", s2h:"Проверьте зону по услуге", s2p:"Выберите свою услугу: если рядом нет мастера с такой же услугой, зона свободна и она может стать вашей.",
+ s3n:"03 — ЗАЯВКА", s3h:"Заполните заявку", s3p:"Форма открывается прямо поверх карты. Отвечаем за два рабочих дня и присылаем условия по вашей зоне.",
+ footTag:"local host · сеть продвигаемых мастеров · 2026", footPolicy:"Политика конфиденциальности",
+ sugCities:"Города сети", sugAddr:"Адреса", sugBusy:"Ищем адреса…", sugSoon:"Скоро", sugFree:"Свободно", sugMast:"маст.", sugExact:"Точно",
+ idleMasters:"Мастера в сети", idleFree:"Города без мастеров", idleAllFree:"Все слоты свободны",
+ idleNoCity:"Не нашли свой город? Всё равно оставьте заявку — города открываем по спросу.",
+ idleApplyAny:"Оставить заявку без города", profile:"Профиль", reachWord:"local host",
+ step2:"Шаг 2 · Статус зоны", coordsOnMap:"Координаты на карте", cityMasters:"Мастера рядом",
+ fNearest:"Ближайший город сети", fFreeSvc:"Свободных услуг", fOf:"из", fReach:"Месячный local host", fCoords:"Координаты", fAnswer:"Ответ на заявку", fAnswerV:"до 2 рабочих дней",
+ btnApply:"Подать заявку", btnWait:"Встать в лист ожидания", btnBack:"Вернуться к карте",
+ vBusyTag:"Слот занят", vBusyTitle:"«{svc}» — зона занята", vBusyText:"В {mi} милях отсюда уже работает наш мастер: {name}. Мы держим одного мастера на зону, но можем поставить вас в лист ожидания.",
+ vNoneTag:"Города пока нет", vNoneTitle:"Этого города ещё нет в сети", vNoneText:"Мы открываем города по заявкам. Расскажите о себе — если наберётся спрос, запустим город и вернёмся к вам первыми.",
+ vSoonTag:"Скоро запускаем", vSoonTitle:"Город открываем в этом квартале", vSoonText:"Заявка сейчас — это первая очередь на слот, когда город запустится.",
+ vCityTag:"Город открыт", vCityTitle:"Город работает — выберите услугу", vCityText:"Укажите свою услугу, и мы проверим, свободна ли зона вокруг вашего адреса.",
+ vFreeTag:"Слот свободен", vFreeTitle:"Да, можем взять вас в продвижение", vFreeText:"По услуге «{svc}» ближайший мастер дальше {mi} миль. Заявка закрепит зону за вами.",
+ curator:"Отобран редакцией сети", sideFull:"Полный профиль", sideWait:"Слот занят — в лист ожидания",
+ pShare:"↗ Поделиться", pWrite:"Написать мастеру", pOther:"Занять зону у себя", pRating:"рейтинг", pWorks:"работ в сети", pSince:"в сети с",
+ pDesc:"Описание", pLinks:"Ссылки", pNote:"Зона «{svc}» вокруг {city} занята",
+ aWaitlist:"Лист ожидания", aApply:"Заявка на зону",
+ aLedeCity:"Город {city}.", aLedeNo:"Города пока нет в сети — расскажите о себе, мы откроем его по спросу.", aRespond:"Ответим за два рабочих дня.",
+ fCity:"Город", fSvc:"Ваша услуга", fName:"Имя и фамилия", fExp:"Опыт, лет", fLink:"Профиль или сайт с работами", fEmail:"Email", fTg:"Телефон или мессенджер", fAbout:"Пара слов о себе",
+ phCity:"Например, Чикаго", phName:"Анна Петрова", phExp:"5", phLink:"instagram.com/…", phEmail:"you@mail.com", phTg:"+1 …", phAbout:"Чем отличаетесь, сколько клиентов в неделю, есть ли своя студия",
+ errCity:"Укажите город", errName:"Укажите, как к вам обращаться", errLink:"Нам нужно увидеть ваши работы", errEmail:"Проверьте адрес — на него придёт ответ",
+ planFormat:"Формат участия", planBasicN:"Базовое", planBasicT:"Бесплатно", planBasicD:"Профиль на карте и в каталоге, ссылка на ваши соцсети.",
+ planPromoN:"Промо-слот", planPromoT:"По договорённости", planPromoD:"Съёмка, тексты, реклама на зону и закрепление её за вами.",
+ consent:"Согласен на обработку контактных данных для ответа на заявку.",
+ btnSend:"Отправить заявку", btnSending:"Отправляем…", fine:"Мы смотрим все заявки вручную. Если зона рядом с вами освободится, напишем вам первыми.",
+ doneTitle:"Заявка принята", doneText:"Ответим на {email} за два рабочих дня и пришлём условия по услуге «{svc}» в городе {city}.",
+ p1t:"Одна зона — <em>один мастер.</em>", p1p:"Мы не сталкиваем вас с соседями по нише. Пока зона ваша, реклама работает только на вас.",
+ p2t:"Съёмка и тексты — <em>на нас.</em>", p2p:"Фотограф, монтаж, описание профиля и посадочная страница. От вас — работа, которую вы и так делаете каждый день.",
+ p3t:"Заявка — <em>десять минут.</em>", p3p:"Заполните форму, мы посмотрим ваши работы и вернёмся с условиями за два рабочих дня.",
+ avFoot:"По заявке · отбор редакцией",
+ tConsent:"Отметьте согласие на обработку данных", tSearching:"Ищем «{q}»…", tLoadingAddr:"Загружаем адрес…",
+ tOnlyUS:"Ищем только по США. Добавьте город: «440 E 89th St, New York»", tNotFound:"Не нашли адрес — попробуйте добавить город",
+ tGeoDown:"Геокодер недоступен — выберите город на карте", tDetecting:"Определяем место…", tSent:"Заявка отправлена · ", tCopied:"Ссылка скопирована",
+ tWrite:"Здесь подключается чат или переход в профиль мастера", tDbDown:"База недоступна — показаны демо-данные", tSendFail:"Не удалось отправить — попробуйте ещё раз",
+ mapPoint:"Точка на карте", milesShort:"миль"
+},
+en:{
+ close:"Close", fav:"Save", brandName:"local host", geo401:"Mapbox: invalid token (401)", geo403:"Mapbox: domain not allowed in token settings (403)", geo422:"Mapbox: query not recognised (422)",
+ brandSub:"network of featured pros", navMap:"Map", navHow:"How it works", navFree:"Open cities", cta:"Apply",
+ step1:"Step 1 · City and service", whereTitle:"Where do you <em>work?</em>",
+ lede:"Enter an address, city or ZIP and pick your service — we'll show whether the slot is open.",
+ phQuery:"Address, city or ZIP", btnFind:"Search", lblService:"Service", svcNone:"not selected",
+ footTap:"Or tap a point on the map", uCities:"cities", uMasters:"pros",
+ legMaster:"Pro in the network", legLive:"City open", legSoon:"Launching soon",
+ roLat:"LAT", roLng:"LNG", roZoom:"ZOOM",
+ stCities:"cities on the map", stMasters:"pros in the network", stFree:"open slots", stDays:"business days to reply",
+ howEyebrow:"How it goes", howTitle:"One area, one service — <em>one pro</em>",
+ s1n:"01 — SEARCH", s1h:"Find your address", s1p:"Type an address, city or ZIP, or tap a point on the map. The avatars are pros we already promote.",
+ s2n:"02 — CHECK", s2h:"Check the area for your service", s2p:"Pick your service: if there's no pro nearby doing the same thing, the area is open and it can be yours.",
+ s3n:"03 — APPLY", s3h:"Fill in the form", s3p:"The form opens right over the map. We reply within two business days with terms for your area.",
+ footTag:"local host · network of featured pros · 2026", footPolicy:"Privacy policy",
+ sugCities:"Network cities", sugAddr:"Addresses", sugBusy:"Searching addresses…", sugSoon:"Soon", sugFree:"Open", sugMast:"pros", sugExact:"Exact",
+ idleMasters:"Pros in the network", idleFree:"Cities without pros", idleAllFree:"All slots open",
+ idleNoCity:"Don't see your city? Apply anyway — we open cities based on demand.",
+ idleApplyAny:"Apply without a city", profile:"Profile", reachWord:"reach",
+ step2:"Step 2 · Area status", coordsOnMap:"Point on the map", cityMasters:"Pros nearby",
+ fNearest:"Nearest network city", fFreeSvc:"Open services", fOf:"of", fReach:"Monthly reach", fCoords:"Coordinates", fAnswer:"Reply time", fAnswerV:"within 2 business days",
+ btnApply:"Apply", btnWait:"Join the waitlist", btnBack:"Back to the map",
+ vBusyTag:"Slot taken", vBusyTitle:"\"{svc}\" — this area is taken", vBusyText:"{name} already works with us {mi} miles from here. We keep one pro per area, but we can put you on the waitlist.",
+ vNoneTag:"City not yet listed", vNoneTitle:"This city isn't in the network yet", vNoneText:"We open cities based on applications. Tell us about yourself — if demand builds up, we'll launch the city and come back to you first.",
+ vSoonTag:"Launching soon", vSoonTitle:"We're opening this city this quarter", vSoonText:"Applying now puts you first in line for a slot when the city goes live.",
+ vCityTag:"City open", vCityTitle:"The city is live — pick your service", vCityText:"Choose your service and we'll check whether the area around your address is free.",
+ vFreeTag:"Slot open", vFreeTitle:"Yes, we can take you on", vFreeText:"For \"{svc}\" the nearest pro is more than {mi} miles away. Applying reserves the area for you.",
+ curator:"Selected by our editors", sideFull:"Full profile", sideWait:"Taken — join the waitlist",
+ pShare:"↗ Share", pWrite:"Message the pro", pOther:"Claim an area near you", pRating:"rating", pWorks:"jobs in the network", pSince:"member since",
+ pDesc:"About", pLinks:"Links", pNote:"The \"{svc}\" area around {city} is taken",
+ aWaitlist:"Waitlist", aApply:"Apply for the area",
+ aLedeCity:"City: {city}.", aLedeNo:"This city isn't in the network yet — tell us about yourself and we'll open it based on demand.", aRespond:"We reply within two business days.",
+ fCity:"City", fSvc:"Your service", fName:"Full name", fExp:"Years of experience", fLink:"Portfolio or website", fEmail:"Email", fTg:"Phone or messenger", fAbout:"A few words about you",
+ phCity:"e.g. Chicago", phName:"Anna Peterson", phExp:"5", phLink:"instagram.com/…", phEmail:"you@mail.com", phTg:"+1 …", phAbout:"What sets you apart, clients per week, do you have your own studio",
+ errCity:"Enter a city", errName:"Tell us your name", errLink:"We need to see your work", errEmail:"Check the address — we'll reply there",
+ planFormat:"Type of partnership", planBasicN:"Basic", planBasicT:"Free", planBasicD:"Profile on the map and in the catalogue, link to your socials.",
+ planPromoN:"Promo slot", planPromoT:"Let's talk", planPromoD:"Photo shoot, copy, local ads and the area reserved for you.",
+ consent:"I agree to my contact details being processed so you can reply.",
+ btnSend:"Send application", btnSending:"Sending…", fine:"We review every application by hand. If an area near you opens up, you'll hear from us first.",
+ doneTitle:"Application received", doneText:"We'll reply to {email} within two business days with terms for \"{svc}\" in {city}.",
+ p1t:"One area — <em>one pro.</em>", p1p:"We won't put you head to head with a neighbour in your niche. While the area is yours, the ads work for you alone.",
+ p2t:"Photos and copy — <em>on us.</em>", p2p:"Photographer, editing, profile copy and a landing page. All you bring is the work you already do every day.",
+ p3t:"Applying takes <em>ten minutes.</em>", p3p:"Fill in the form, we'll look at your work and come back with terms within two business days.",
+ avFoot:"By application · editor-reviewed",
+ tConsent:"Please tick the consent box", tSearching:"Searching \"{q}\"…", tLoadingAddr:"Loading the address…",
+ tOnlyUS:"We search the US only. Add the city: \"440 E 89th St, New York\"", tNotFound:"Address not found — try adding the city",
+ tGeoDown:"Search is unavailable — pick a city on the map", tDetecting:"Locating…", tSent:"Application sent · ", tCopied:"Link copied",
+ tWrite:"This is where chat or the pro's profile would open", tDbDown:"Database unavailable — showing demo data", tSendFail:"Couldn't send — please try again",
+ mapPoint:"Point on the map", milesShort:"miles"
+},
+es:{
+ close:"Cerrar", fav:"Guardar", brandName:"local host", geo401:"Mapbox: token inválido (401)", geo403:"Mapbox: dominio no permitido en el token (403)", geo422:"Mapbox: consulta no reconocida (422)",
+ brandSub:"red de profesionales destacados", navMap:"Mapa", navHow:"Cómo funciona", navFree:"Ciudades libres", cta:"Postular",
+ step1:"Paso 1 · Ciudad y servicio", whereTitle:"¿Dónde <em>trabajas?</em>",
+ lede:"Escribe una dirección, ciudad o código postal y elige tu servicio — te decimos si la plaza está libre.",
+ phQuery:"Dirección, ciudad o código postal", btnFind:"Buscar", lblService:"Servicio", svcNone:"sin elegir",
+ footTap:"O toca un punto en el mapa", uCities:"ciudades", uMasters:"profesionales",
+ legMaster:"Profesional en la red", legLive:"Ciudad abierta", legSoon:"Próxima apertura",
+ roLat:"LAT", roLng:"LON", roZoom:"ZOOM",
+ stCities:"ciudades en el mapa", stMasters:"profesionales en la red", stFree:"plazas libres", stDays:"días hábiles para responder",
+ howEyebrow:"Cómo funciona", howTitle:"Una zona, un servicio — <em>un profesional</em>",
+ s1n:"01 — BÚSQUEDA", s1h:"Encuentra tu dirección", s1p:"Escribe una dirección, ciudad o código postal, o toca un punto en el mapa. Los avatares son profesionales que ya promocionamos.",
+ s2n:"02 — COMPROBACIÓN", s2h:"Comprueba la zona por servicio", s2p:"Elige tu servicio: si cerca no hay nadie con el mismo servicio, la zona está libre y puede ser tuya.",
+ s3n:"03 — SOLICITUD", s3h:"Completa el formulario", s3p:"El formulario se abre sobre el mapa. Respondemos en dos días hábiles con las condiciones de tu zona.",
+ footTag:"local host · red de profesionales destacados · 2026", footPolicy:"Política de privacidad",
+ sugCities:"Ciudades de la red", sugAddr:"Direcciones", sugBusy:"Buscando direcciones…", sugSoon:"Pronto", sugFree:"Libre", sugMast:"prof.", sugExact:"Exacta",
+ idleMasters:"Profesionales en la red", idleFree:"Ciudades sin profesionales", idleAllFree:"Todas las plazas libres",
+ idleNoCity:"¿No ves tu ciudad? Postula igualmente — abrimos ciudades según la demanda.",
+ idleApplyAny:"Postular sin ciudad", profile:"Perfil", reachWord:"alcance",
+ step2:"Paso 2 · Estado de la zona", coordsOnMap:"Punto en el mapa", cityMasters:"Profesionales cerca",
+ fNearest:"Ciudad más cercana de la red", fFreeSvc:"Servicios libres", fOf:"de", fReach:"Alcance mensual", fCoords:"Coordenadas", fAnswer:"Tiempo de respuesta", fAnswerV:"hasta 2 días hábiles",
+ btnApply:"Postular", btnWait:"Unirse a la lista de espera", btnBack:"Volver al mapa",
+ vBusyTag:"Plaza ocupada", vBusyTitle:"«{svc}» — la zona está ocupada", vBusyText:"{name} ya trabaja con nosotros a {mi} millas de aquí. Mantenemos un profesional por zona, pero podemos apuntarte a la lista de espera.",
+ vNoneTag:"Ciudad aún no listada", vNoneTitle:"Esta ciudad todavía no está en la red", vNoneText:"Abrimos ciudades según las solicitudes. Cuéntanos sobre ti — si hay demanda, la lanzamos y te avisamos primero.",
+ vSoonTag:"Próxima apertura", vSoonTitle:"Abrimos esta ciudad este trimestre", vSoonText:"Postular ahora te pone el primero en la fila cuando la ciudad se active.",
+ vCityTag:"Ciudad abierta", vCityTitle:"La ciudad está activa — elige tu servicio", vCityText:"Indica tu servicio y comprobamos si la zona alrededor de tu dirección está libre.",
+ vFreeTag:"Plaza libre", vFreeTitle:"Sí, podemos trabajar contigo", vFreeText:"Para «{svc}» el profesional más cercano está a más de {mi} millas. La solicitud reserva la zona para ti.",
+ curator:"Elegido por la redacción", sideFull:"Perfil completo", sideWait:"Ocupada — lista de espera",
+ pShare:"↗ Compartir", pWrite:"Escribir al profesional", pOther:"Reservar una zona cerca de ti", pRating:"valoración", pWorks:"trabajos en la red", pSince:"en la red desde",
+ pDesc:"Descripción", pLinks:"Enlaces", pNote:"La zona «{svc}» alrededor de {city} está ocupada",
+ aWaitlist:"Lista de espera", aApply:"Solicitud de zona",
+ aLedeCity:"Ciudad: {city}.", aLedeNo:"Esta ciudad aún no está en la red — cuéntanos sobre ti y la abriremos según la demanda.", aRespond:"Respondemos en dos días hábiles.",
+ fCity:"Ciudad", fSvc:"Tu servicio", fName:"Nombre y apellido", fExp:"Años de experiencia", fLink:"Portafolio o web", fEmail:"Email", fTg:"Teléfono o mensajería", fAbout:"Unas palabras sobre ti",
+ phCity:"p. ej. Chicago", phName:"Ana Pérez", phExp:"5", phLink:"instagram.com/…", phEmail:"tu@correo.com", phTg:"+1 …", phAbout:"Qué te diferencia, clientes por semana, si tienes estudio propio",
+ errCity:"Indica la ciudad", errName:"Dinos tu nombre", errLink:"Necesitamos ver tu trabajo", errEmail:"Revisa el correo — allí responderemos",
+ planFormat:"Tipo de participación", planBasicN:"Básico", planBasicT:"Gratis", planBasicD:"Perfil en el mapa y en el catálogo, enlace a tus redes.",
+ planPromoN:"Plaza promo", planPromoT:"A convenir", planPromoD:"Sesión de fotos, textos, publicidad en la zona y reserva de la misma para ti.",
+ consent:"Acepto el tratamiento de mis datos de contacto para recibir respuesta.",
+ btnSend:"Enviar solicitud", btnSending:"Enviando…", fine:"Revisamos cada solicitud a mano. Si se libera una zona cerca de ti, te avisamos primero.",
+ doneTitle:"Solicitud recibida", doneText:"Responderemos a {email} en dos días hábiles con las condiciones de «{svc}» en {city}.",
+ p1t:"Una zona — <em>un profesional.</em>", p1p:"No te enfrentamos con un vecino de tu mismo nicho. Mientras la zona sea tuya, la publicidad trabaja solo para ti.",
+ p2t:"Fotos y textos — <em>de nuestra parte.</em>", p2p:"Fotógrafo, edición, descripción del perfil y página de destino. Tú solo pones el trabajo que ya haces cada día.",
+ p3t:"Postular lleva <em>diez minutos.</em>", p3p:"Completa el formulario, miramos tu trabajo y volvemos con las condiciones en dos días hábiles.",
+ avFoot:"Por solicitud · revisado por la redacción",
+ tConsent:"Marca la casilla de consentimiento", tSearching:"Buscando «{q}»…", tLoadingAddr:"Cargando la dirección…",
+ tOnlyUS:"Buscamos solo en EE. UU. Añade la ciudad: «440 E 89th St, New York»", tNotFound:"No encontramos la dirección — prueba añadiendo la ciudad",
+ tGeoDown:"Búsqueda no disponible — elige una ciudad en el mapa", tDetecting:"Localizando…", tSent:"Solicitud enviada · ", tCopied:"Enlace copiado",
+ tWrite:"Aquí se abriría el chat o el perfil del profesional", tDbDown:"Base de datos no disponible — datos de demostración", tSendFail:"No se pudo enviar — inténtalo de nuevo",
+ mapPoint:"Punto en el mapa", milesShort:"millas"
+}
+};
+
+/* язык из адреса (?lang=en), иначе из браузера, иначе английский */
+function pickLang(){
+  const q=new URLSearchParams(location.search).get('lang');
+  if(q && I18N[q]) return q;
+  const nav=(navigator.language||'en').slice(0,2).toLowerCase();
+  return I18N[nav] ? nav : 'en';
+}
+let LANG = pickLang();
+document.documentElement.lang = LANG;
+
+/* t('key',{svc:'…'}) — подстановки в фигурных скобках */
+function t(key,vars){
+  let s = (I18N[LANG] && I18N[LANG][key]) ?? I18N.en[key] ?? key;
+  if(vars) for(const k in vars) s = s.split('{'+k+'}').join(vars[k]);
+  return s;
+}
+/* название города и услуги на текущем языке */
+function cityName(c){ return LANG==='ru' ? (c.ru||c.n) : (c.n||c.ru) }
+function svcName(id){
+  const s=SERVICES.find(x=>x.id===id); if(!s) return '—';
+  return s[LANG] || s.en || s.ru;
+}
+/* тексты мастера: из базы могут прийти bio_en, quote_es и т.д. */
+function mtext(m,field){
+  return m[field+'_'+LANG] || m[field] || '';
+}
+function mtags(m){
+  return m['tags_'+LANG] || m.tags || [];
+}
+
+function applyStatic(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=t(el.dataset.i18nHtml));
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder=t(el.dataset.i18nPh));
+  document.querySelectorAll('[data-i18n-aria]').forEach(el=>el.setAttribute('aria-label',t(el.dataset.i18nAria)));
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('on',b.dataset.lang===LANG));
+}
+
+function setLang(code){
+  if(!I18N[code] || code===LANG) return;
+  LANG=code;
+  const u=new URL(location.href); u.searchParams.set('lang',code);
+  history.replaceState(null,'',u);
+  applyStatic();
+  svcSel.innerHTML=`<option value="">${t('svcNone')}</option>`+
+    SERVICES.map(s=>`<option value="${s.id}">${svcName(s.id)}</option>`).join('');
+  buildMarkers();
+  refreshCounters();
+  if(current) renderResult(current); else renderIdle();
+}
 
 /* =======================================================================
    2. ВСПОМОГАТЕЛЬНОЕ
    ======================================================================= */
 const $ = s=>document.querySelector(s);
 const esc = s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const svcName = id=>(SERVICES.find(s=>s.id===id)||{}).ru||'—';
 const cityByKey = k=>CITIES.find(c=>c.n===k);
 const mastersOf = k=>MASTERS.filter(m=>m.city===k);
 
@@ -856,24 +1132,32 @@ function distKm(a,b,c,d){const R=6371,r=Math.PI/180,dLat=(c-a)*r,dLng=(d-b)*r;
   const x=Math.sin(dLat/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin(dLng/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
 function nearestCity(lat,lng){let b=null,bd=Infinity;CITIES.forEach(c=>{const d=distKm(lat,lng,c.lat,c.lng);if(d<bd){bd=d;b=c}});return{city:b,km:bd}}
 
+/* кто занимает зону в этой точке по этой услуге */
+function occupiedBy(lat,lng,svc){
+  if(lat==null||!svc) return null;
+  const today=new Date().toISOString().slice(0,10);
+  let best=null,bd=Infinity;
+  MASTERS.forEach(m=>{
+    if(m.svc!==svc) return;
+    if(m.slot_until && m.slot_until<today) return;
+    const mi=distKm(lat,lng,m.lat,m.lng)*MI_PER_KM;
+    if(mi<=(m.radius_mi||RADIUS_MI_DEFAULT) && mi<bd){ bd=mi; best=m }
+  });
+  return best ? {master:best, mi:Math.round(bd*10)/10} : null;
+}
+
 function verdict(place){
-  if(!place.cityKey) return {k:"none",tag:"Города пока нет",
-    title:"Этого города ещё нет в сети",
-    text:"Мы открываем города по заявкам. Расскажите о себе — если наберётся спрос, запустим город и вернёмся к вам первыми."};
+  const busy = occupiedBy(place.lat, place.lng, place.svc);
+  if(busy) return {k:"busy",tag:t('vBusyTag'),master:busy.master,
+    title:t('vBusyTitle',{svc:svcName(place.svc)}),
+    text:t('vBusyText',{mi:busy.mi,name:busy.master.name})};
+
+  if(!place.cityKey) return {k:"none",tag:t('vNoneTag'),title:t('vNoneTitle'),text:t('vNoneText')};
   const city = cityByKey(place.cityKey);
-  if(city.s==="soon") return {k:"soon",tag:"Скоро запускаем",
-    title:"Город открываем в этом квартале",
-    text:"Заявка сейчас — это первая очередь на слот, когда город запустится."};
-  if(!place.svc) return {k:"free",tag:"Город открыт",
-    title:"Город работает — выберите услугу",
-    text:"Укажите свою услугу, и мы покажем, занят ли по ней слот именно в этом городе."};
-  const busy = mastersOf(city.n).find(m=>m.svc===place.svc);
-  if(busy) return {k:"busy",tag:"Слот занят",master:busy,
-    title:`«${svcName(place.svc)}» в городе уже занят`,
-    text:"Мы работаем с одним мастером на город по каждой услуге. Можем поставить вас в лист ожидания."};
-  return {k:"free",tag:"Слот свободен",
-    title:"Да, можем взять вас в продвижение",
-    text:`По услуге «${svcName(place.svc)}» в этом городе мастера ещё нет. Заявка закрепит слот за вами.`};
+  if(city.s==="soon") return {k:"soon",tag:t('vSoonTag'),title:t('vSoonTitle'),text:t('vSoonText')};
+  if(!place.svc) return {k:"free",tag:t('vCityTag'),title:t('vCityTitle'),text:t('vCityText')};
+  return {k:"free",tag:t('vFreeTag'),title:t('vFreeTitle'),
+    text:t('vFreeText',{svc:svcName(place.svc),mi:RADIUS_MI_DEFAULT})};
 }
 
 /* =======================================================================
@@ -886,30 +1170,38 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_only_labels/{z}
   {subdomains:'abcd',maxZoom:19,opacity:.75,attribution:''}).addTo(map);
 
 const cityMarkers=new Map(), mstrMarkers=new Map();
-
-CITIES.forEach(city=>{
-  const n = mastersOf(city.n).length;
-  const badge = n ? `<span class="city-badge">${n}</span>` : '';
-  const mk = L.marker([city.lat,city.lng],{
-    icon:L.divIcon({className:'',iconSize:[11,11],iconAnchor:[5.5,5.5],
-      html:`<div class="pin is-${city.s}"><div class="pin-dot"></div><span class="pin-label">${esc(city.ru)}</span>${badge}</div>`}),
-    title:city.ru}).addTo(map);
-  mk.on('click',()=>selectCity(city,true));
-  cityMarkers.set(city.n,mk);
-});
-
 const OFFSETS=[[0,-34],[36,-58],[-36,-58],[0,-84],[64,-32]];
-CITIES.forEach(city=>{
-  mastersOf(city.n).forEach((m,i)=>{
+
+function buildMarkers(){
+  cityMarkers.forEach(mk=>map.removeLayer(mk)); cityMarkers.clear();
+  mstrMarkers.forEach(mk=>map.removeLayer(mk)); mstrMarkers.clear();
+
+  CITIES.forEach(city=>{
+    const n = mastersOf(city.n).length;
+    const badge = n ? `<span class="city-badge">${n}</span>` : '';
+    const mk = L.marker([city.lat,city.lng],{
+      icon:L.divIcon({className:'',iconSize:[11,11],iconAnchor:[5.5,5.5],
+        html:`<div class="pin is-${city.s}"><div class="pin-dot"></div><span class="pin-label">${esc(cityName(city))}</span>${badge}</div>`}),
+      title:cityName(city)}).addTo(map);
+    mk.on('click',()=>selectCity(city,true));
+    cityMarkers.set(city.n,mk);
+  });
+
+  /* мастера стоят на своих координатах, а не в центре города */
+  const byPoint={};
+  MASTERS.forEach(m=>{
+    const key=m.lat.toFixed(2)+','+m.lng.toFixed(2);
+    const i=(byPoint[key]=(byPoint[key]??-1)+1);
     const [dx,dy]=OFFSETS[i%OFFSETS.length];
-    const mk=L.marker([city.lat,city.lng],{
+    const mk=L.marker([m.lat,m.lng],{
       icon:L.divIcon({className:'',iconSize:[40,40],iconAnchor:[20-dx,20-dy],
         html:`<div class="mstr" data-m="${m.id}">${avatar(m)}<i class="mstr-svc"></i><span class="mstr-name">${esc(m.name)}</span></div>`}),
       title:m.name,riseOnHover:true,zIndexOffset:500}).addTo(map);
     mk.on('click',e=>{L.DomEvent.stopPropagation(e);openMaster(m,true)});
     mstrMarkers.set(m.id,mk);
   });
-});
+}
+buildMarkers();
 
 const reticle=$('#reticle');
 function updateReadout(){
@@ -932,17 +1224,27 @@ function toast(m){toastEl.textContent=m;toastEl.classList.add('on');clearTimeout
 /* =======================================================================
    4. СЧЁТЧИКИ
    ======================================================================= */
-const liveCities=CITIES.filter(c=>c.s==='live');
-$('#n-mstr').textContent=MASTERS.length;
-$('#n-live').textContent=liveCities.length;
-$('#n-soon').textContent=CITIES.filter(c=>c.s==='soon').length;
-$('#s1').textContent=CITIES.length;
-$('#s2').textContent=MASTERS.length;
-$('#s3').textContent=liveCities.length*SERVICES.length-MASTERS.length;
-$('#foot-count').textContent=CITIES.length+' городов · '+MASTERS.length+' мастеров';
+let liveCities=CITIES.filter(c=>c.s==='live');
+function refreshCounters(){
+  liveCities=CITIES.filter(c=>c.s==='live');
+  $('#n-mstr').textContent=MASTERS.length;
+  $('#n-live').textContent=liveCities.length;
+  $('#n-soon').textContent=CITIES.filter(c=>c.s==='soon').length;
+  $('#s1').textContent=CITIES.length;
+  $('#s2').textContent=MASTERS.length;
+  $('#s3').textContent=Math.max(0,liveCities.length*SERVICES.length-MASTERS.length);
+  $('#foot-count').textContent=CITIES.length+' '+t('uCities')+' · '+MASTERS.length+' '+t('uMasters');
+}
+refreshCounters();
+
+/* город мастера: у записей из базы города может не быть */
+function masterCity(m){
+  return cityByKey(m.city) || nearestCity(m.lat,m.lng).city
+      || {ru:'—',c:'',lat:m.lat,lng:m.lng,n:null,reach:null};
+}
 
 const svcSel=$('#svc');
-svcSel.innerHTML=`<option value="">не выбрана</option>`+SERVICES.map(s=>`<option value="${s.id}">${s.ru}</option>`).join('');
+svcSel.innerHTML=`<option value="">${t('svcNone')}</option>`+SERVICES.map(s=>`<option value="${s.id}">${svcName(s.id)}</option>`).join('');
 svcSel.onchange=()=>{ if(current) renderResult({...current,svc:svcSel.value}) };
 
 /* =======================================================================
@@ -962,20 +1264,20 @@ function renderIdle(){
   const feat=MASTERS.slice(0,6);
   const free=liveCities.filter(c=>mastersOf(c.n).length===0).slice(0,6);
   body.innerHTML=`
-    <div class="pad"><div class="sect-label"><span class="eyebrow">Мастера в сети</span></div></div>
-    ${feat.map(m=>{const c=cityByKey(m.city);return `
+    <div class="pad"><div class="sect-label"><span class="eyebrow">${t('idleMasters')}</span></div></div>
+    ${feat.map(m=>{const c=masterCity(m);return `
       <button class="mrow" data-m="${m.id}">${avatar(m)}
         <span><span class="mrow-name">${esc(m.name)}</span><br>
-        <span class="mrow-svc">${esc(svcName(m.svc))} · ${esc(c.ru)}</span></span>
-        <span class="mrow-go">Профиль</span></button>`}).join('')}
-    <div class="pad"><div class="sect-label"><span class="eyebrow">Города без мастеров</span></div></div>
+        <span class="mrow-svc">${esc(svcName(m.svc))} · ${esc(cityName(c))}</span></span>
+        <span class="mrow-go">${t('profile')}</span></button>`}).join('')}
+    <div class="pad"><div class="sect-label"><span class="eyebrow">${t('idleFree')}</span></div></div>
     ${free.map(c=>`
       <button class="idle-row" data-city="${c.n}"><i class="dot live"></i>
-        <span><span class="idle-city">${esc(c.ru)}</span><br><span class="idle-country">${esc(c.c)} · охват ${esc(c.reach)}</span></span>
-        <span class="idle-status tag free">Все слоты свободны</span></button>`).join('')}
+        <span><span class="idle-city">${esc(cityName(c))}</span><br><span class="idle-country">${esc(c.c)} · ${t('reachWord')} ${esc(c.reach)}</span></span>
+        <span class="idle-status tag free">${t('idleAllFree')}</span></button>`).join('')}
     <div class="pad">
-      <p style="color:var(--slate);font-size:12.5px;margin:0 0 14px">Не нашли свой город? Всё равно оставьте заявку — города открываем по спросу.</p>
-      <button class="btn btn-ghost btn-block" data-apply-any>Оставить заявку без города</button>
+      <p style="color:var(--slate);font-size:12.5px;margin:0 0 14px">${t('idleNoCity')}</p>
+      <button class="btn btn-ghost btn-block" data-apply-any>${t('idleApplyAny')}</button>
     </div>`;
   body.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>openMaster(MASTERS.find(x=>x.id===b.dataset.m),true));
   body.querySelectorAll('[data-city]').forEach(b=>b.onclick=()=>selectCity(cityByKey(b.dataset.city),true));
@@ -990,29 +1292,29 @@ function renderResult(place){
   const freeSvc=city&&city.s==='live'?SERVICES.filter(s=>!list.some(m=>m.svc===s.id)):[];
   body.innerHTML=`
     <div class="result-head">
-      <span class="eyebrow">Шаг 2 · Статус слота</span>
+      <span class="eyebrow">${t('step2')}</span>
       <h2 class="result-city">${esc(place.name)}</h2>
-      <p class="result-sub">${esc(place.country||'Координаты на карте')}${place.svc?' · '+esc(svcName(place.svc)):''}</p>
+      <p class="result-sub">${esc(place.country||t('coordsOnMap'))}${place.svc?' · '+esc(svcName(place.svc)):''}</p>
       <div class="verdict ${v.k}">
         <span class="tag ${v.k}">${v.tag}</span>
         <h3>${v.title}</h3><p>${v.text}</p>
       </div>
     </div>
     ${list.length?`
-      <div class="pad" style="padding-bottom:6px"><div class="sect-label"><span class="eyebrow">Мастера города · ${list.length}</span></div></div>
+      <div class="pad" style="padding-bottom:6px"><div class="sect-label"><span class="eyebrow">${t('cityMasters')} · ${list.length}</span></div></div>
       ${list.map(m=>`<button class="mrow" data-m="${m.id}">${avatar(m)}
         <span><span class="mrow-name">${esc(m.name)}</span><br><span class="mrow-svc">${esc(svcName(m.svc))}</span></span>
-        <span class="mrow-go">Профиль</span></button>`).join('')}`:''}
+        <span class="mrow-go">${t('profile')}</span></button>`).join('')}`:''}
     <dl class="facts">
-      ${place.nearName?`<div class="fact"><dt>Ближайший город сети</dt><dd>${esc(place.nearName)}${place.nearKm>1?' · '+place.nearKm+' км':''}</dd></div>`:''}
-      ${city?`<div class="fact"><dt>Свободных услуг</dt><dd class="num">${freeSvc.length} из ${SERVICES.length}</dd></div>`:''}
-      ${place.reach?`<div class="fact"><dt>Месячный охват</dt><dd class="num">${esc(place.reach)}</dd></div>`:''}
-      <div class="fact"><dt>Координаты</dt><dd class="num">${place.lat.toFixed(3)}, ${place.lng.toFixed(3)}</dd></div>
-      <div class="fact"><dt>Ответ на заявку</dt><dd>до 2 рабочих дней</dd></div>
+      ${place.nearName?`<div class="fact"><dt>${t('fNearest')}</dt><dd>${esc(place.nearName)}${place.nearKm>1?' · '+place.nearKm+' km':''}</dd></div>`:''}
+      ${city?`<div class="fact"><dt>${t('fFreeSvc')}</dt><dd class="num">${freeSvc.length} ${t('fOf')} ${SERVICES.length}</dd></div>`:''}
+      ${place.reach?`<div class="fact"><dt>${t('fReach')}</dt><dd class="num">${esc(place.reach)}</dd></div>`:''}
+      <div class="fact"><dt>${t('fCoords')}</dt><dd class="num">${place.lat.toFixed(3)}, ${place.lng.toFixed(3)}</dd></div>
+      <div class="fact"><dt>${t('fAnswer')}</dt><dd>${t('fAnswerV')}</dd></div>
     </dl>
     <div class="pad">
-      <button class="btn btn-ink btn-block" data-apply>${v.k==='busy'?'Встать в лист ожидания':'Подать заявку'}</button>
-      <button class="btn btn-ghost btn-block" style="margin-top:9px" data-back>Вернуться к карте</button>
+      <button class="btn btn-ink btn-block" data-apply>${v.k==='busy'?t('btnWait'):t('btnApply')}</button>
+      <button class="btn btn-ghost btn-block" style="margin-top:9px" data-back>${t('btnBack')}</button>
     </div>`;
   body.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>openMaster(MASTERS.find(x=>x.id===b.dataset.m),true));
   body.querySelector('[data-apply]').onclick=()=>openApply(place);
@@ -1028,7 +1330,7 @@ function selectCity(city,fly){
   const mk=cityMarkers.get(city.n);
   if(mk){const el=mk.getElement(); if(el) el.querySelector('.pin').classList.add('sel')}
   if(fly) map.flyTo([city.lat,city.lng],Math.max(map.getZoom(),8),{duration:1.4});
-  renderResult({name:city.ru,country:city.c,lat:city.lat,lng:city.lng,cityKey:city.n,reach:city.reach,svc:svcSel.value});
+  renderResult({name:cityName(city),country:city.c,lat:city.lat,lng:city.lng,cityKey:city.n,reach:city.reach,svc:svcSel.value});
   sugEl.classList.remove('on');
 }
 function selectPoint(lat,lng,label,country){
@@ -1046,41 +1348,41 @@ function selectPoint(lat,lng,label,country){
    7. БОКОВАЯ КАРТОЧКА МАСТЕРА
    ======================================================================= */
 function openMaster(m,fly){
-  const c=cityByKey(m.city);
+  const c=masterCity(m);
   document.querySelectorAll('.mstr.sel').forEach(e=>e.classList.remove('sel'));
   const mk=mstrMarkers.get(m.id);
   if(mk){const el=mk.getElement(); if(el) el.querySelector('.mstr').classList.add('sel')}
-  if(fly) map.flyTo([c.lat,c.lng],Math.max(map.getZoom(),8),{duration:1.4});
+  if(fly) map.flyTo([m.lat,m.lng],Math.max(map.getZoom(),10),{duration:1.4});
 
   side.innerHTML=`
     <div class="side-hero">
       ${avatar(m)}
-      <button class="side-close" data-side-close aria-label="Закрыть">✕</button>
+      <button class="side-close" data-side-close aria-label="${t('close')}">✕</button>
       <div class="side-hero-txt">
-        <span class="eyebrow">${esc(c.ru)}, ${esc(c.c)}</span>
+        <span class="eyebrow">${esc(cityName(c))}, ${esc(c.c)}</span>
         <h3>${esc(m.name)}</h3>
       </div>
     </div>
     <div class="side-body">
       <div class="chips">
         <span class="tag plain">${esc(svcName(m.svc))}</span>
-        ${m.tags.slice(0,2).map(t=>`<span class="tag plain">${esc(t)}</span>`).join('')}
+        ${mtags(m).slice(0,2).map(x=>`<span class="tag plain">${esc(x)}</span>`).join('')}
       </div>
-      <div class="quote">«${esc(m.quote)}»
-        <div class="quote-by">${avatar(m)}<span class="eyebrow">${CURATOR}</span></div>
+      <div class="quote">«${esc(mtext(m,'quote'))}»
+        <div class="quote-by">${avatar(m)}<span class="eyebrow">${t('curator')}</span></div>
       </div>
-      <p class="side-bio">${esc(m.bio)}</p>
+      <p class="side-bio">${esc(mtext(m,'bio'))}</p>
     </div>
     <div class="side-foot">
-      <button class="btn btn-lime btn-block" data-full>Полный профиль</button>
-      <button class="btn btn-ghost btn-block" data-wait>Слот занят — в лист ожидания</button>
+      <button class="btn btn-lime btn-block" data-full>${t('sideFull')}</button>
+      <button class="btn btn-ghost btn-block" data-wait>${t('sideWait')}</button>
     </div>`;
   side.classList.add('on');
   side.querySelector('[data-side-close]').onclick=()=>{closeSide();clearSel()};
   side.querySelector('[data-full]').onclick=()=>openProfile(m);
-  side.querySelector('[data-wait]').onclick=()=>openApply({name:c.ru,country:c.c,lat:c.lat,lng:c.lng,cityKey:c.n,svc:m.svc});
+  side.querySelector('[data-wait]').onclick=()=>openApply({name:cityName(c),country:c.c,lat:c.lat,lng:c.lng,cityKey:c.n,svc:m.svc});
   svcSel.value=m.svc;
-  renderResult({name:c.ru,country:c.c,lat:c.lat,lng:c.lng,cityKey:c.n,reach:c.reach,svc:m.svc});
+  renderResult({name:cityName(c),country:c.c,lat:c.lat,lng:c.lng,cityKey:c.n,reach:c.reach,svc:m.svc});
 }
 
 /* =======================================================================
@@ -1105,62 +1407,58 @@ document.addEventListener('keydown',e=>{
 
 /* --- полный профиль --- */
 function openProfile(m){
-  const c=cityByKey(m.city);
+  const c=masterCity(m);
   $('#pcard').innerHTML=`
     <div class="pcard-hero">
       ${avatar(m)}
-      <button class="icon-btn fav" data-fav aria-label="В избранное">♥</button>
-      <button class="icon-btn close" data-close-p aria-label="Закрыть">✕</button>
+      <button class="icon-btn fav" data-fav aria-label="${t('fav')}">♥</button>
+      <button class="icon-btn close" data-close-p aria-label="${t('close')}">✕</button>
       <div class="pcard-hero-txt">
-        <span class="eyebrow">${esc(c.ru)}, ${esc(c.c)}</span>
+        <span class="eyebrow">${esc(cityName(c))}, ${esc(c.c)}</span>
         <h2>${esc(m.name)}</h2>
       </div>
     </div>
     <div class="pcard-body">
       <div class="pcard-row">
         <span class="tag plain">${esc(svcName(m.svc))}</span>
-        ${m.tags.map(t=>`<span class="tag plain">${esc(t)}</span>`).join('')}
-        <button class="share" data-share>↗ Поделиться</button>
+        ${mtags(m).map(x=>`<span class="tag plain">${esc(x)}</span>`).join('')}
+        <button class="share" data-share>${t('pShare')}</button>
       </div>
-      <div class="quote">«${esc(m.quote)}»
-        <div class="quote-by">${avatar(m)}<span class="eyebrow">${CURATOR}</span></div>
+      <div class="quote">«${esc(mtext(m,'quote'))}»
+        <div class="quote-by">${avatar(m)}<span class="eyebrow">${t('curator')}</span></div>
       </div>
       <div class="pcard-cta">
-        <button class="btn btn-lime" data-write>Написать мастеру</button>
-        <button class="btn btn-ghost" data-other>Занять слот в своём городе</button>
+        <button class="btn btn-lime" data-write>${t('pWrite')}</button>
+        <button class="btn btn-ghost" data-other>${t('pOther')}</button>
       </div>
       <div class="stats">
-        <div><span class="k num">${esc(m.rate)}</span><span class="v">рейтинг</span></div>
-        <div><span class="k num">${esc(String(m.works))}</span><span class="v">работ в сети</span></div>
-        <div><span class="k num">${esc(String(m.since))}</span><span class="v">в сети с</span></div>
+        <div><span class="k num">${esc(m.rate)}</span><span class="v">${t('pRating')}</span></div>
+        <div><span class="k num">${esc(String(m.works))}</span><span class="v">${t('pWorks')}</span></div>
+        <div><span class="k num">${esc(String(m.since))}</span><span class="v">${t('pSince')}</span></div>
       </div>
-      <div class="pcard-sect"><span class="eyebrow">Описание</span><p>${esc(m.bio)}</p></div>
-      <div class="pcard-sect"><span class="eyebrow">Ссылки</span>
+      <div class="pcard-sect"><span class="eyebrow">${t('pDesc')}</span><p>${esc(mtext(m,'bio'))}</p></div>
+      <div class="pcard-sect"><span class="eyebrow">${t('pLinks')}</span>
         <div class="links">${m.links.map(l=>`<a class="link-chip" href="${esc(l.u)}" target="_blank" rel="noopener">↗ ${esc(l.t)}</a>`).join('')}</div>
       </div>
     </div>
     <div class="pcard-note">
-      <span class="eyebrow">Слот «${esc(svcName(m.svc))}» в городе ${esc(c.ru)} занят</span>
+      <span class="eyebrow">${t('pNote',{svc:svcName(m.svc),city:cityName(c)})}</span>
     </div>`;
   const p=$('#pcard');
   p.querySelector('[data-close-p]').onclick=()=>closeOverlay('#ov-profile');
   p.querySelector('[data-fav]').onclick=e=>e.currentTarget.classList.toggle('on');
   p.querySelector('[data-share]').onclick=()=>{
     const url=location.href.split('#')[0]+'#'+m.id;
-    if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>toast('Ссылка скопирована'))}
+    if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>toast(t('tCopied')))}
   };
-  p.querySelector('[data-write]').onclick=()=>toast('Здесь подключается чат или переход в профиль мастера');
+  p.querySelector('[data-write]').onclick=()=>toast(t('tWrite'));
   p.querySelector('[data-other]').onclick=()=>{closeOverlay('#ov-profile');openApply({name:'',cityKey:null,svc:m.svc})};
   openOverlay('#ov-profile');
   p.scrollTop=0;
 }
 
 /* --- заявка --- */
-const PITCH=[
-  {t:"Один город — <em>один мастер.</em>",p:"Мы не сталкиваем вас с соседями по нише. Пока слот ваш, реклама в городе работает только на вас."},
-  {t:"Съёмка и тексты — <em>на нас.</em>",p:"Фотограф, монтаж, описание профиля и посадочная страница. От вас — работа, которую вы и так делаете каждый день."},
-  {t:"Заявка — <em>десять минут.</em>",p:"Заполните форму, мы посмотрим ваши работы и вернёмся с условиями по городу за два рабочих дня."}
-];
+const PITCH_KEYS=[['p1t','p1p'],['p2t','p2p'],['p3t','p3p']];
 let pitchIdx=0, pitchTimer=null, applyPlan='promo';
 
 function openApply(place){
@@ -1172,13 +1470,13 @@ function openApply(place){
   $('#acard').innerHTML=`
     <div class="aside-visual">
       <div class="av-top">
-        <span class="av-brand">ОХВАТ <i></i></span>
-        <span class="av-step num" id="av-step">01 / 0${PITCH.length}</span>
+        <span class="av-brand">${t('brandName')} <i></i></span>
+        <span class="av-step num" id="av-step">01 / 0${PITCH_KEYS.length}</span>
       </div>
       <h3 class="av-title" id="av-title"></h3>
       <div class="av-slides" id="av-slides"></div>
       <div class="av-dots" id="av-dots"></div>
-      <span class="av-foot">По заявке · отбор редакцией</span>
+      <span class="av-foot">${t('avFoot')}</span>
       <svg class="av-map" viewBox="0 0 200 200" fill="none" aria-hidden="true">
         <circle cx="100" cy="100" r="96" stroke="#DCF24B" stroke-width=".6"/>
         <circle cx="100" cy="100" r="66" stroke="#DCF24B" stroke-width=".6"/>
@@ -1188,47 +1486,46 @@ function openApply(place){
     </div>
 
     <div class="aform">
-      <button class="icon-btn close aform-close" data-close-a aria-label="Закрыть">✕</button>
+      <button class="icon-btn close aform-close" data-close-a aria-label="${t('close')}">✕</button>
       <span class="tag ${v.k}">${v.tag}</span>
-      <h2>${waiting?'Лист ожидания':'Заявка на слот'}</h2>
-      <p class="lede">${c?`Город ${esc(c.ru)}, ${esc(c.c)}.`:'Города пока нет в сети — расскажите о себе, мы откроем его по спросу.'} Ответим за два рабочих дня.</p>
+      <h2>${waiting?t('aWaitlist'):t('aApply')}</h2>
+      <p class="lede">${c?t('aLedeCity',{city:esc(cityName(c))}):t('aLedeNo')} ${t('aRespond')}</p>
 
       <div class="two">
-        <div class="field"><label for="f-city">Город</label>
-          <input id="f-city" value="${esc(place.name||'')}" placeholder="Например, Казань"><span class="err">Укажите город</span></div>
-        <div class="field"><label for="f-svc">Ваша услуга</label>
-          <select id="f-svc">${SERVICES.map(s=>`<option value="${s.id}"${svc===s.id?' selected':''}>${s.ru}</option>`).join('')}</select></div>
+        <div class="field"><label for="f-city">${t('fCity')}</label>
+          <input id="f-city" value="${esc(place.name||'')}" placeholder="${t('phCity')}"><span class="err">${t('errCity')}</span></div>
+        <div class="field"><label for="f-svc">${t('fSvc')}</label>
+          <select id="f-svc">${SERVICES.map(x=>`<option value="${x.id}"${svc===x.id?' selected':''}>${svcName(x.id)}</option>`).join('')}</select></div>
       </div>
       <div class="two">
-        <div class="field"><label for="f-name">Имя и фамилия</label>
-          <input id="f-name" autocomplete="name" placeholder="Анна Петрова"><span class="err">Укажите, как к вам обращаться</span></div>
-        <div class="field"><label for="f-exp">Опыт, лет</label>
-          <input id="f-exp" inputmode="numeric" placeholder="5"></div>
+        <div class="field"><label for="f-name">${t('fName')}</label>
+          <input id="f-name" autocomplete="name" placeholder="${t('phName')}"><span class="err">${t('errName')}</span></div>
+        <div class="field"><label for="f-exp">${t('fExp')}</label>
+          <input id="f-exp" inputmode="numeric" placeholder="${t('phExp')}"></div>
       </div>
-      <div class="field"><label for="f-link">Профиль или сайт с работами</label>
-        <input id="f-link" placeholder="instagram.com/…"><span class="err">Нам нужно увидеть ваши работы</span></div>
+      <div class="field"><label for="f-link">${t('fLink')}</label>
+        <input id="f-link" placeholder="${t('phLink')}"><span class="err">${t('errLink')}</span></div>
       <div class="two">
-        <div class="field"><label for="f-email">Email</label>
-          <input id="f-email" type="email" autocomplete="email" placeholder="you@mail.com"><span class="err">Проверьте адрес — на него придёт ответ</span></div>
-        <div class="field"><label for="f-tg">Телефон или Telegram</label>
-          <input id="f-tg" placeholder="@nickname"></div>
+        <div class="field"><label for="f-email">${t('fEmail')}</label>
+          <input id="f-email" type="email" autocomplete="email" placeholder="${t('phEmail')}"><span class="err">${t('errEmail')}</span></div>
+        <div class="field"><label for="f-tg">${t('fTg')}</label>
+          <input id="f-tg" placeholder="${t('phTg')}"></div>
       </div>
-      <div class="field"><label for="f-about">Пара слов о себе</label>
-        <textarea id="f-about" placeholder="Чем отличаетесь, сколько клиентов в неделю, есть ли своя студия"></textarea></div>
+      <div class="field"><label for="f-about">${t('fAbout')}</label>
+        <textarea id="f-about" placeholder="${t('phAbout')}"></textarea></div>
 
-      <span class="eyebrow">Формат участия</span>
+      <span class="eyebrow">${t('planFormat')}</span>
       <div class="plans">
-        <button class="plan" data-plan="basic"><span class="pn">Базовое</span><span class="pt">Бесплатно</span>
-          <span class="pd">Профиль на карте и в каталоге, ссылка на ваши соцсети.</span></button>
-        <button class="plan on" data-plan="promo"><span class="pn">Промо-слот</span><span class="pt">По договорённости</span>
-          <span class="pd">Съёмка, тексты, реклама на город и закрепление слота за вами.</span></button>
+        <button class="plan" data-plan="basic"><span class="pn">${t('planBasicN')}</span><span class="pt">${t('planBasicT')}</span>
+          <span class="pd">${t('planBasicD')}</span></button>
+        <button class="plan on" data-plan="promo"><span class="pn">${t('planPromoN')}</span><span class="pt">${t('planPromoT')}</span>
+          <span class="pd">${t('planPromoD')}</span></button>
       </div>
 
-      <label class="consent"><input type="checkbox" id="f-ok">
-        Согласен на обработку контактных данных для ответа на заявку.</label>
+      <label class="consent"><input type="checkbox" id="f-ok"> ${t('consent')}</label>
 
-      <button class="btn btn-lime btn-block" id="submit">${waiting?'Встать в лист ожидания':'Отправить заявку'}</button>
-      <p class="fine">Мы смотрим все заявки вручную. Если слот в вашем городе освободится, напишем вам первыми.</p>
+      <button class="btn btn-lime btn-block" id="submit">${waiting?t('btnWait'):t('btnSend')}</button>
+      <p class="fine">${t('fine')}</p>
     </div>`;
 
   const a=$('#acard');
@@ -1246,18 +1543,18 @@ function openApply(place){
 function buildPitch(){
   const slides=$('#av-slides'), dots=$('#av-dots');
   if(!slides) return;
-  slides.innerHTML=PITCH.map((s,i)=>`<div class="av-slide${i===0?' on':''}"><p>${s.p}</p></div>`).join('');
-  dots.innerHTML=PITCH.map((s,i)=>`<button data-i="${i}" class="${i===0?'on':''}" aria-label="Слайд ${i+1}"></button>`).join('');
+  slides.innerHTML=PITCH_KEYS.map((k,i)=>`<div class="av-slide${i===0?' on':''}"><p>${t(k[1])}</p></div>`).join('');
+  dots.innerHTML=PITCH_KEYS.map((k,i)=>`<button data-i="${i}" class="${i===0?'on':''}" aria-label="${i+1}"></button>`).join('');
   dots.querySelectorAll('button').forEach(b=>b.onclick=()=>setPitch(+b.dataset.i));
   setPitch(0);
   clearInterval(pitchTimer);
-  pitchTimer=setInterval(()=>{ if($('#av-title')) setPitch((pitchIdx+1)%PITCH.length); else clearInterval(pitchTimer) },5200);
+  pitchTimer=setInterval(()=>{ if($('#av-title')) setPitch((pitchIdx+1)%PITCH_KEYS.length); else clearInterval(pitchTimer) },5200);
 }
 function setPitch(i){
   pitchIdx=i;
-  const t=$('#av-title'); if(!t) return;
-  t.innerHTML=PITCH[i].t;
-  $('#av-step').textContent='0'+(i+1)+' / 0'+PITCH.length;
+  const el=$('#av-title'); if(!el) return;
+  el.innerHTML=t(PITCH_KEYS[i][0]);
+  $('#av-step').textContent='0'+(i+1)+' / 0'+PITCH_KEYS.length;
   document.querySelectorAll('.av-slide').forEach((s,j)=>s.classList.toggle('on',j===i));
   document.querySelectorAll('.av-dots button').forEach((d,j)=>d.classList.toggle('on',j===i));
 }
@@ -1271,10 +1568,11 @@ function submitApply(){
     el.closest('.field').classList.toggle('invalid',bad);
     if(bad&&ok){el.focus();ok=false}
   });
-  if(!document.getElementById('f-ok').checked){ if(ok) toast('Отметьте согласие на обработку данных'); return }
+  if(!document.getElementById('f-ok').checked){ if(ok) toast(t('tConsent')); return }
   if(!ok) return;
 
   const payload={
+    ticket:'OKH-'+String(Date.now()).slice(-6),
     city:document.getElementById('f-city').value.trim(),
     service:document.getElementById('f-svc').value,
     name:document.getElementById('f-name').value.trim(),
@@ -1283,26 +1581,48 @@ function submitApply(){
     email:document.getElementById('f-email').value.trim(),
     contact:document.getElementById('f-tg').value.trim(),
     about:document.getElementById('f-about').value.trim(),
-    plan:applyPlan, ts:new Date().toISOString()
+    plan:applyPlan,
+    lat: current && current.lat!=null ? current.lat : null,
+    lng: current && current.lng!=null ? current.lng : null
   };
-  /* ⬇⬇ СЮДА ПОДКЛЮЧАЕТСЯ БЭКЕНД:
-     fetch('/api/leads',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}) */
-  console.log('Заявка:',payload);
 
-  const ticket='ОХВ-'+String(Date.now()).slice(-6);
+  const btn=document.getElementById('submit');
+  if(DB){
+    btn.disabled=true; btn.textContent=t('btnSending');
+    fetch(`${SUPABASE.url}/rest/v1/leads`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json',apikey:SUPABASE.anonKey,
+               Authorization:'Bearer '+SUPABASE.anonKey,Prefer:'return=minimal'},
+      body:JSON.stringify(payload)
+    }).then(r=>{
+      if(!r.ok) throw new Error('supabase '+r.status);
+      showDone(payload);
+    }).catch(err=>{
+      console.error('[заявка] не отправилась:',err);
+      btn.disabled=false; btn.textContent=t('btnSend');
+      toast(t('tSendFail'));
+    });
+    return;
+  }
+  console.log('Заявка (база не подключена):',payload);
+  showDone(payload);
+}
+
+function showDone(payload){
+  const ticket=payload.ticket;
   clearInterval(pitchTimer);
   $('#acard').querySelector('.aform').innerHTML=`
-    <button class="icon-btn close aform-close" data-close-a aria-label="Закрыть">✕</button>
+    <button class="icon-btn close aform-close" data-close-a aria-label="${t('close')}">✕</button>
     <div class="done">
       <div class="seal"><svg width="30" height="30" viewBox="0 0 24 24" fill="none">
         <path d="M4 12.5 9.5 18 20 6.5" stroke="#14110E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <h3>Заявка принята</h3>
-      <p>Ответим на ${esc(payload.email)} за два рабочих дня и пришлём условия по услуге «${esc(svcName(payload.service))}» в городе ${esc(payload.city)}.</p>
+      <h3>${t('doneTitle')}</h3>
+      <p>${t('doneText',{email:esc(payload.email),svc:esc(svcName(payload.service)),city:esc(payload.city)})}</p>
       <div class="ticket">${ticket}</div><br>
-      <button class="btn btn-ghost" data-close-a>Вернуться к карте</button>
+      <button class="btn btn-ghost" data-close-a>${t('btnBack')}</button>
     </div>`;
   $('#acard').querySelectorAll('[data-close-a]').forEach(b=>b.onclick=()=>closeOverlay('#ov-apply'));
-  toast('Заявка отправлена · '+ticket);
+  toast(t('tSent')+ticket);
 }
 
 /* =======================================================================
@@ -1321,13 +1641,15 @@ const GEO = {
   countries:'us',    // коды стран через запятую; пустая строка — весь мир
   lang:'ru',
   minChars:3,        // с какой длины запроса идём в геокодер
-  debounce:550,      // пауза после набора, мс
+  debounce:280,      // пауза после набора, мс
   limit:5            // сколько адресов показывать
 };
 const PROVIDER = MAPBOX_TOKEN ? 'mapbox' : 'nominatim';
 if(PROVIDER==='mapbox') map.attributionControl.addAttribution('© Mapbox');
+console.info('%c[поиск] геокодер: '+PROVIDER, 'font-weight:bold',
+  PROVIDER==='nominatim' ? '— токен Mapbox не задан, строка MAPBOX_TOKEN пуста' : '— токен найден');
 
-let geoTimer=null, geoAbort=null, remoteHits=[];
+let geoTimer=null, geoAbort=null, remoteHits=[], geoBusy=false;
 
 function isPostal(v){ return GEO.countries==='us' ? /^[0-9]{5}(-[0-9]{4})?$/.test(v.trim()) : /^[0-9]{4,6}(-[0-9]{4})?$/.test(v.trim()) }
 /* адрес: есть цифры и слово, либо запятая */
@@ -1337,11 +1659,20 @@ function looksLikeAddress(v){
   return (/\d/.test(s) && /[a-zA-Zа-яА-ЯёЁ]{3,}/.test(s)) || s.includes(',');
 }
 
-/* ---------- нормализация ответов: оба геокодера отдают один формат ----------
-   {lat, lng, title, sub, precise}                                            */
-function normMapbox(f){
-  const p=f.properties||{};
-  const co=p.coordinates||{};
+/* ---------- нормализация: оба геокодера отдают один формат ----------
+   {lat, lng, title, sub, precise, id?}  — id есть у подсказок Mapbox,
+   координаты у них подтягиваются отдельным запросом при выборе.      */
+function normMapboxSuggest(s){
+  return {
+    id: s.mapbox_id,
+    title: s.name || s.name_preferred || '',
+    sub: s.place_formatted || s.full_address || '',
+    precise: s.feature_type==='address',
+    lat:null, lng:null
+  };
+}
+function normMapboxFeature(f){
+  const p=f.properties||{}, co=p.coordinates||{};
   return {
     lat: co.latitude ?? f.geometry.coordinates[1],
     lng: co.longitude ?? f.geometry.coordinates[0],
@@ -1362,7 +1693,11 @@ function normNominatim(p){
   };
 }
 
-/* ---------- прямой поиск ---------- */
+/* сессия Mapbox: серия подсказок + выбор считаются одним обращением */
+let sessionToken = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2);
+function newSession(){ sessionToken = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) }
+
+/* ---------- подсказки по мере набора ---------- */
 async function geocode(q,limit){
   if(geoAbort) geoAbort.abort();
   geoAbort=new AbortController();
@@ -1371,12 +1706,16 @@ async function geocode(q,limit){
 
   if(PROVIDER==='mapbox'){
     const p=new URLSearchParams({q:query,limit:String(limit),language:GEO.lang,
-      autocomplete:'true',access_token:MAPBOX_TOKEN});
+      session_token:sessionToken, access_token:MAPBOX_TOKEN,
+      types:'address,street,place,postcode,locality,neighborhood'});
     if(GEO.countries) p.set('country',GEO.countries);
-    const r=await fetch(`https://api.mapbox.com/search/geocode/v6/forward?${p}`,opts);
+    const r=await fetch(`https://api.mapbox.com/search/searchbox/v1/suggest?${p}`,opts);
     if(!r.ok) throw new Error('mapbox '+r.status);
     const j=await r.json();
-    return (j.features||[]).map(normMapbox);
+    const hits=(j.suggestions||[]).map(normMapboxSuggest);
+    if(hits.length) return hits;
+    /* обрывок не распознан — пробуем обычный геокодер */
+    return mapboxForward(query,limit,opts);
   }
 
   const p=new URLSearchParams({format:'jsonv2',addressdetails:'1',limit:String(limit),'accept-language':GEO.lang});
@@ -1387,6 +1726,31 @@ async function geocode(q,limit){
   return (await r.json()).map(normNominatim);
 }
 
+async function mapboxForward(query,limit,opts){
+  const p=new URLSearchParams({q:query,limit:String(limit),language:GEO.lang,
+    autocomplete:'true',access_token:MAPBOX_TOKEN});
+  if(GEO.countries) p.set('country',GEO.countries);
+  const r=await fetch(`https://api.mapbox.com/search/geocode/v6/forward?${p}`,opts||{});
+  if(!r.ok) throw new Error('mapbox '+r.status);
+  const j=await r.json();
+  return (j.features||[]).map(normMapboxFeature);
+}
+
+/* ---------- координаты выбранной подсказки ---------- */
+async function resolveHit(h){
+  if(h.lat!=null && h.lng!=null) return h;
+  if(!h.id) throw new Error('no id');
+  const p=new URLSearchParams({session_token:sessionToken,access_token:MAPBOX_TOKEN,language:GEO.lang});
+  const r=await fetch(`https://api.mapbox.com/search/searchbox/v1/retrieve/${encodeURIComponent(h.id)}?${p}`);
+  if(!r.ok) throw new Error('mapbox '+r.status);
+  const j=await r.json();
+  const f=(j.features||[])[0];
+  if(!f) throw new Error('empty');
+  const co=f.geometry.coordinates;
+  newSession();
+  return {...h, lat:co[1], lng:co[0]};
+}
+
 /* ---------- обратный поиск: клик по карте ---------- */
 async function reverseGeocode(lat,lng){
   if(PROVIDER==='mapbox'){
@@ -1394,7 +1758,7 @@ async function reverseGeocode(lat,lng){
       language:GEO.lang,access_token:MAPBOX_TOKEN,types:'place'});
     const r=await fetch(`https://api.mapbox.com/search/geocode/v6/reverse?${p}`);
     const j=await r.json();
-    return j.features && j.features.length ? normMapbox(j.features[0]) : null;
+    return j.features && j.features.length ? normMapboxFeature(j.features[0]) : null;
   }
   const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&accept-language=${GEO.lang}&lat=${lat}&lon=${lng}`);
   const j=await r.json();
@@ -1403,34 +1767,38 @@ async function reverseGeocode(lat,lng){
 
 function localMatches(v){
   const s=v.trim().toLowerCase(); if(!s) return [];
-  return CITIES.filter(c=>c.ru.toLowerCase().includes(s)||c.n.toLowerCase().includes(s)).slice(0,5);
+  return CITIES.filter(c=>(c.ru||'').toLowerCase().includes(s)||c.n.toLowerCase().includes(s)).slice(0,5);
 }
 
 function renderSuggest(){
   const cities=localMatches(qEl.value);
-  if(!cities.length && !remoteHits.length){sugEl.classList.remove('on');sugEl.innerHTML='';return}
+  if(!cities.length && !remoteHits.length && !geoBusy){sugEl.classList.remove('on');sugEl.innerHTML='';return}
   let html='';
   if(cities.length){
-    html+=`<div class="sug-group"><span class="eyebrow">Города сети</span></div>`;
+    html+=`<div class="sug-group"><span class="eyebrow">${t('sugCities')}</span></div>`;
     html+=cities.map(c=>{
       const n=mastersOf(c.n).length;
       return `<button class="suggest-item" data-city="${c.n}"><i class="dot ${c.s}"></i>
-        <span class="suggest-name">${esc(c.ru)} <span style="color:var(--slate)">· ${esc(c.c)}</span></span>
-        <span class="suggest-meta">${c.s==='soon'?'Скоро':(n?n+' маст.':'Свободно')}</span></button>`}).join('');
+        <span class="suggest-name">${esc(cityName(c))} <span style="color:var(--slate)">· ${esc(c.c)}</span></span>
+        <span class="suggest-meta">${c.s==='soon'?t('sugSoon'):(n?n+' '+t('sugMast'):t('sugFree'))}</span></button>`}).join('');
   }
   if(remoteHits.length){
-    html+=`<div class="sug-group"><span class="eyebrow">Адреса</span></div>`;
+    html+=`<div class="sug-group"><span class="eyebrow">${t('sugAddr')}</span></div>`;
     html+=remoteHits.map((h,i)=>`
       <button class="suggest-item addr" data-hit="${i}">
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M8 15s5-4.7 5-8.4A5 5 0 0 0 3 6.6C3 10.3 8 15 8 15Z" stroke="currentColor" stroke-width="1.3"/>
           <circle cx="8" cy="6.5" r="1.7" stroke="currentColor" stroke-width="1.3"/></svg>
         <span class="suggest-name">${esc(h.title)}<br><span class="suggest-sub">${esc(h.sub)}</span></span>
-        ${h.precise?'<span class="suggest-meta">Точно</span>':''}</button>`).join('');
+        ${h.precise?`<span class="suggest-meta">${t('sugExact')}</span>`:''}</button>`).join('');
+  }
+  if(geoBusy && !remoteHits.length){
+    html+=`<div class="sug-group"><span class="eyebrow">${t('sugAddr')}</span></div>
+      <div class="sug-busy"><span class="eyebrow">${t('sugBusy')}</span></div>`;
   }
   sugEl.innerHTML=html;
   sugEl.querySelectorAll('[data-city]').forEach(b=>b.onclick=()=>{
-    const c=cityByKey(b.dataset.city); qEl.value=c.ru; selectCity(c,true)});
+    const c=cityByKey(b.dataset.city); qEl.value=cityName(c); selectCity(c,true)});
   sugEl.querySelectorAll('[data-hit]').forEach(b=>b.onclick=()=>{
     const h=remoteHits[+b.dataset.hit];
     qEl.value=h.title+(h.sub?', '+h.sub:'');
@@ -1442,16 +1810,38 @@ function renderSuggest(){
 function scheduleRemote(){
   clearTimeout(geoTimer);
   const v=qEl.value.trim();
-  if(v.length<GEO.minChars || (!looksLikeAddress(v) && !isPostal(v))){ remoteHits=[]; renderSuggest(); return }
+  /* Mapbox ищет и города, и адреса — шлём любой запрос.
+     Nominatim бережём: только адреса и индексы. */
+  const worth = PROVIDER==='mapbox' ? v.length>=GEO.minChars
+                                    : (v.length>=GEO.minChars && (looksLikeAddress(v)||isPostal(v)));
+  if(!worth){ remoteHits=[]; geoBusy=false; renderSuggest(); return }
+  geoBusy=true; renderSuggest();
   geoTimer=setTimeout(async()=>{
     try{ remoteHits=await geocode(v,GEO.limit) }
-    catch(e){ if(e.name!=='AbortError') remoteHits=[] }
+    catch(e){ if(e.name!=='AbortError'){ remoteHits=[]; geoError(e) } }
+    geoBusy=false;
     renderSuggest();
   },GEO.debounce);
 }
 
+/* понятные сообщения вместо молчания */
+function geoError(e){
+  const m=String(e.message||e);
+  console.warn('[поиск] ошибка геокодера:',m);
+  if(m.includes('401')) toast(t('geo401'));
+  else if(m.includes('403')) toast(t('geo403'));
+  else if(m.includes('422')) toast(t('geo422'));
+  else toast(t('tGeoDown'));
+}
+
 /* точка на карте: остаёмся ровно на адресе, к центру города не смещаемся */
-function selectAddress(h){
+async function selectAddress(hit){
+  let h=hit;
+  if(h.lat==null){
+    toast(t('tLoadingAddr'));
+    try{ h=await resolveHit(hit) }
+    catch(e){ geoError(e); return }
+  }
   clearSel(); closeSide();
   pickMarker=L.marker([h.lat,h.lng],{icon:L.divIcon({className:'',iconSize:[16,16],iconAnchor:[8,8],
     html:'<div class="pick"></div>'})}).addTo(map);
@@ -1471,25 +1861,23 @@ function selectAddress(h){
 async function runSearch(){
   const v=qEl.value.trim(); if(!v){qEl.focus();return}
   const local=localMatches(v);
-  const exact=local.find(c=>c.ru.toLowerCase()===v.toLowerCase()||c.n.toLowerCase()===v.toLowerCase());
+  const exact=local.find(c=>(c.ru||'').toLowerCase()===v.toLowerCase()||c.n.toLowerCase()===v.toLowerCase());
   if(exact){selectCity(exact,true);return}
   if(remoteHits.length){ selectAddress(remoteHits[0]); return }
   if(local.length===1){selectCity(local[0],true);return}
-  toast('Ищем «'+v+'»…');
+  toast(t('tSearching',{q:v}));
   try{
     const hits=await geocode(v,1);
     if(!hits.length){
       if(local.length){selectCity(local[0],true);return}
-      toast(ONLY_COUNTRY==='США'
-        ? 'Ищем только по США. Добавьте город: «440 E 89th St, New York»'
-        : 'Не нашли адрес — попробуйте добавить город');
+      toast(ONLY_COUNTRY ? t('tOnlyUS') : t('tNotFound'));
       return;
     }
     selectAddress(hits[0]);
   }catch(e){
     if(e.name==='AbortError') return;
     if(local.length){selectCity(local[0],true);return}
-    toast('Поиск недоступен — выберите город на карте');
+    geoError(e);
   }
 }
 
@@ -1509,19 +1897,32 @@ map.on('click',async e=>{
   const {lat,lng}=e.latlng;
   const near=nearestCity(lat,lng);
   if(near.km<=RADIUS_KM){selectCity(near.city,true);return}
-  toast('Определяем место…');
+  toast(t('tDetecting'));
   try{
     const h=await reverseGeocode(lat,lng);
-    selectPoint(lat,lng, h && h.title ? h.title : 'Точка на карте', h ? h.sub : '');
-  }catch(err){ selectPoint(lat,lng,'Точка на карте','') }
+    selectPoint(lat,lng, h && h.title ? h.title : t('mapPoint'), h ? h.sub : '');
+  }catch(err){ selectPoint(lat,lng,t('mapPoint'),'') }
 });
 
 $('#cta-top').onclick=()=>openApply(current||{name:'',cityKey:null,svc:svcSel.value});
 $('#nav-open').onclick=e=>{e.preventDefault();qEl.value='';renderIdle();map.flyTo(HOME_VIEW.center,HOME_VIEW.zoom,{duration:1.2})};
 $('#nav-map').onclick=e=>e.preventDefault();
 window.addEventListener('resize',()=>map.invalidateSize());
+document.querySelectorAll('.lang-btn').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+applyStatic();
+svcSel.innerHTML=`<option value="">${t('svcNone')}</option>`+SERVICES.map(x=>`<option value="${x.id}">${svcName(x.id)}</option>`).join('');
 renderIdle();
 setTimeout(()=>map.invalidateSize(),200);
+
+/* данные из базы, если она подключена */
+if(DB){
+  loadFromDB().catch(e=>{
+    console.error('[база] не загрузилась, работаем на демо-данных:',e);
+    toast(t('tDbDown'));
+  });
+}else{
+  console.info('[база] Supabase не подключён — демо-данные из файла');
+}
 </script>
 </body>
 </html>
