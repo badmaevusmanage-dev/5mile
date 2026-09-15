@@ -92,6 +92,7 @@
   .chip:disabled{opacity:.45}
   .scale .chip{border-radius:10px}
   .hint,.scale-legend{color:var(--muted)}
+  textarea:disabled{cursor:default}
   .logo{height:14px;width:auto;display:block;opacity:.9}
   header{min-height:52px}
 </style>
@@ -272,12 +273,24 @@ function ask(q){
   return new Promise(resolve => {
     composer.innerHTML = '';
     const done = (value, display) => {
-      composer.innerHTML = '';
+      idle();
       resolve({ value, display: display ?? (Array.isArray(value) ? value.join(', ') : String(value)) });
     };
     ({ text: renderText, choice: renderChoice, multi: renderMulti, scale: renderScale })[q.type](q, done);
     scrollDown();
   });
+}
+
+// Неактивное поле ввода, пока бот печатает
+function idle(){
+  composer.innerHTML = '';
+  const row = el('div', 'inputrow inputbox');
+  const ta = el('textarea'); ta.rows = 1; ta.disabled = true; ta.placeholder = 'Напишите ответ…';
+  ta.setAttribute('aria-hidden', 'true'); ta.tabIndex = -1;
+  const btn = el('button', 'send'); btn.type = 'button'; btn.disabled = true; btn.innerHTML = SEND_ICON; btn.tabIndex = -1;
+  btn.setAttribute('aria-hidden', 'true');
+  const bar = el('div', 'inputbar'); bar.append(btn);
+  row.append(ta, bar); composer.append(row);
 }
 
 function renderText(q, done){
@@ -442,12 +455,10 @@ async function finish(){
 }
 
 async function run(){
+  idle();
   await bot('Привет! 👋');
   await bot('Я задам вам несколько вопросов о вашей работе и целях. Это займёт 10–15 минут.');
   await bot('Отвечайте честно: здесь нет правильных и неправильных ответов, есть только ваша точка старта.');
-  const go = await ask({ type:'choice', options:['Поехали! 🚀'] });
-  user(go.display);
-
   for (const q of QUESTIONS){
     if (q.skip && q.skip(A)) continue;
     for (const m of (q.intro || [])) await bot(fill(m));
