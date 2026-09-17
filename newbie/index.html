@@ -4,7 +4,26 @@
 <meta charset="UTF-8">
 <meta name="theme-color" content="#151515">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Анкета мастера</title>
+<title>Анкета для бьюти-мастеров и салонов — nextpace</title>
+<meta name="description" content="Ответьте на 5 вопросов за 2 минуты — разберём, где вы сейчас и как привести больше клиентов.">
+
+<!-- Превью ссылки в WhatsApp, Telegram, Instagram, Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="nextpace">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://www.nextpace.studio/newbie/">
+<meta property="og:title" content="Анкета для бьюти-мастеров и салонов — nextpace">
+<meta property="og:description" content="Ответьте на 5 вопросов за 2 минуты — разберём, где вы сейчас и как привести больше клиентов.">
+<meta property="og:image" content="https://www.nextpace.studio/newbie/og-image.jpg">
+<meta property="og:image:secure_url" content="https://www.nextpace.studio/newbie/og-image.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="nextpace — анкета для бьюти-мастеров и салонов">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Анкета для бьюти-мастеров и салонов — nextpace">
+<meta name="twitter:description" content="Ответьте на 5 вопросов за 2 минуты — разберём, где вы сейчас и как привести больше клиентов.">
+<meta name="twitter:image" content="https://www.nextpace.studio/newbie/og-image.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&display=swap" rel="stylesheet">
@@ -115,8 +134,8 @@
 /* ================== НАСТРОЙКИ ================== */
 const CONFIG = {
   // Вставьте сюда ссылку веб-приложения Google Apps Script (заканчивается на /exec)
-  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyt0C9OwaoLu1rItJ4fPlNzzSrskubUMtuFzYcKCtgiIus_6vaieUbYoGmxmZ1QN2uO/exec',
-  TYPING_SPEED: 0.5, // 0.5 — быстрее, 2 — медленнее
+  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzjKcDpPM-K2Mw0xbVXy2bWoiIPQO4NEMvu2_pzVlktLkyXB0q3xzk7NlD_lP-7cQZ_2A/exec',
+  TYPING_SPEED: 1, // 0.5 — быстрее, 2 — медленнее
 
   // true — короткая заявка: только имя и контакт
   // false — анкета из 5 вопросов
@@ -371,17 +390,17 @@ async function finish(){
   if (CONFIG.SHORT_MODE){
     await bot('Мы получили ваши контакты и свяжемся с вами в ближайшее время.');
   } else {
-    await bot('Спасибо что описали, где вы сейчас, и назвали свою цель.');
+    await bot('Вы только что сделали то, на что многие не решаются годами: честно описали, где вы сейчас, и назвали свою цель.');
     const ch = (A.channels || []).filter(c => c !== NONE);
     if (ch.length === 0){
-      await bot('Продвижение пока не выстроено - и это хорошая новость. Значит, ваш потолок гораздо выше, чем кажется сейчас.');
+      await bot('Продвижение пока не выстроено — и это хорошая новость. Значит, ваш потолок гораздо выше, чем кажется сейчас.');
     } else if (ch.length <= 3){
       await bot(`Сейчас вы используете ${ch.length} ${plural(ch.length, ['канал','канала','каналов'])} продвижения. Каждый неиспользованный канал — это не слабость, а резерв новых клиентов.`);
     } else {
       await bot('У вас уже есть база: несколько каналов продвижения. Теперь задача — превратить их в систему, которая стабильно приводит клиентов.');
     }
     await bot('Если многое из этого вы ещё не делали — впереди много работы. Но теперь у вас есть точка А и точка Б, а значит, можно построить маршрут.');
-    await bot('Мы изучим ваши ответы и свяжемся с вами.');
+    await bot('Мы изучим ваши ответы и свяжемся с вами в течение 24 часов.');
   }
   const ok = await sending;
   note(ok ? 'Ответы отправлены' : 'Не получилось отправить ответы. Проверьте интернет и обновите страницу.');
