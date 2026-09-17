@@ -115,8 +115,8 @@
 /* ================== НАСТРОЙКИ ================== */
 const CONFIG = {
   // Вставьте сюда ссылку веб-приложения Google Apps Script (заканчивается на /exec)
-  SCRIPT_URL: '',
-  TYPING_SPEED: 1, // 0.5 — быстрее, 2 — медленнее
+  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyt0C9OwaoLu1rItJ4fPlNzzSrskubUMtuFzYcKCtgiIus_6vaieUbYoGmxmZ1QN2uO/exec',
+  TYPING_SPEED: 0.5, // 0.5 — быстрее, 2 — медленнее
 
   // true — короткая заявка: только имя и контакт
   // false — анкета из 5 вопросов
@@ -183,12 +183,21 @@ const QUESTIONS = [
     intro:['Спасибо, почти готово!'],
     text: a => isSalon(a) ? 'Как называется салон и как к вам обращаться?' : 'Как к вам обращаться?',
     placeholder:'Ваше имя' },
-  { id:'contact', label:'Контакт', type:'text',
-    text:'Оставьте номер телефона или ник в Telegram, и мы с вами свяжемся',
-    placeholder:'+1 (310) 555-0123 или @username',
-    validate: v => (v.replace(/\D/g, '').length >= 10 || /@[a-zA-Z0-9_]{3,}|t\.me\//.test(v))
-      ? null
-      : 'Кажется, контакт неполный. Напишите номер телефона целиком, например +1 310 555 0123, или ник в Telegram через @' }
+  { id:'contact', label:'Instagram и телефон', type:'text',
+    text: a => isSalon(a)
+      ? 'И последнее: оставьте ссылку на Instagram салона и номер телефона для связи'
+      : 'И последнее: оставьте ссылку на ваш Instagram и номер телефона для связи',
+    placeholder:'@username, +1 310 555 0123',
+    mergeOnRetry: true, // если номера не было, следующий ответ дописывается к предыдущему — Instagram не надо писать заново
+    validate: v => {
+      const m = v.match(/(^|[^a-zA-Z0-9_.@\/])(\+?\d[\d\s().-]{8,}\d)/);
+      const digits = m ? m[2].replace(/\D/g, '').length : 0;
+      return (digits >= 10 && digits <= 15)
+        ? null
+        : (/[a-zA-Z@]/.test(v)
+          ? 'Спасибо! Добавьте, пожалуйста, ещё номер телефона, например +1 310 555 0123'
+          : 'Напишите, пожалуйста, Instagram и номер телефона целиком, например: @username, +1 310 555 0123');
+    } }
 ];
 
 
@@ -384,7 +393,7 @@ async function run(){
   idle();
   await bot('Привет! 👋');
   if (CONFIG.SHORT_MODE){
-    await bot('Оставьте, пожалуйста, имя и контакт — это займёт полминуты.');
+    await bot('Оставьте, пожалуйста, имя, Instagram и номер телефона — это займёт полминуты.');
   } else {
     await bot('Ответьте на 5 коротких вопросов — это займёт 2–3 минуты.');
     await bot('По ответам мы поймём, где вы сейчас и чем можем помочь именно вам.');
@@ -393,12 +402,14 @@ async function run(){
     if (!isActive(q)) continue;
     if (!CONFIG.SHORT_MODE) for (const m of (q.intro || [])) await bot(fill(m));
     await bot(fill(typeof q.text === 'function' ? q.text(A) : q.text));
-    let r;
+    let r, previous = '';
     while (true){
       r = await ask(q);
       user(r.display);
+      if (previous) r.value = previous + ', ' + r.value;
       const error = q.validate ? q.validate(r.value) : null;
       if (!error) break;
+      if (q.mergeOnRetry && /[a-zA-Z@]/.test(r.value)) previous = r.value;
       await bot(error);
     }
     A[q.id] = r.value;
