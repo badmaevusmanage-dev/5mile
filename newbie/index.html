@@ -115,127 +115,80 @@
 /* ================== НАСТРОЙКИ ================== */
 const CONFIG = {
   // Вставьте сюда ссылку веб-приложения Google Apps Script (заканчивается на /exec)
-  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzwDW_oa5JMIWJtioz8cKx7a58JkBqUwRc9bChbnRV2sNCw8bM3w_v6Pb48eQWfDR67/exec',
-  TYPING_SPEED: 1 // 0.5 — быстрее, 2 — медленнее
+  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzjKcDpPM-K2Mw0xbVXy2bWoiIPQO4NEMvu2_pzVlktLkyXB0q3xzk7NlD_lP-7cQZ_2A/exec',
+  TYPING_SPEED: 1, // 0.5 — быстрее, 2 — медленнее
+
+  // true — короткая заявка: только имя и контакт
+  // false — анкета из 5 вопросов
+  SHORT_MODE: false
 };
 
+// Вопросы, которые задаются в короткой заявке
+const SHORT_IDS = ['name', 'contact'];
 
-const NOVICE = 'Только начинаю / учусь';
-const NOTHING = 'Пока ничего нет';
+
+const NONE = 'Пока ничего';
+const isSalon = a => a.type === 'Салон / студия';
 
 /* ================== ВОПРОСЫ ==================
    type: text | choice | multi | scale
    label — название колонки в таблице
-   score — баллы для оценки «подходим или нет»
+   text может быть функцией: a => (разный текст для мастера и салона)
 */
 const QUESTIONS = [
-  // Блок 1. Знакомство
-  { id:'name', label:'Имя', type:'text', text:'Как вас зовут?', placeholder:'Ваше имя',
-    react: v => `Очень приятно, ${v}! ✨` },
+  // 1. Кто вы
+  { id:'type', label:'Кто', type:'choice',
+    text:'Для начала: кто вы?',
+    options:['Мастер','Салон / студия'],
+    react: v => v === 'Мастер' ? 'Отлично, давайте познакомимся поближе ✨' : 'Отлично, расскажите немного о салоне ✨' },
+
+  // 2. Ниша и город
+  { id:'niche', label:'Ниша', type:'multi',
+    text: a => isSalon(a) ? 'Какие услуги есть в салоне?' : 'В какой нише вы работаете?',
+    options:['Маникюр / педикюр','Брови','Ресницы','Волосы','Макияж','Косметология','Массаж','Депиляция','Другое'] },
+  { id:'nicheOther', label:'Своя ниша', type:'text',
+    text:'Напишите, какие ещё услуги',
+    skip: a => !String(a.niche || '').includes('Другое') },
+  { id:'city', label:'Город', type:'text',
+    text: a => isSalon(a) ? 'В каком городе и районе находится салон?' : 'В каком городе и районе вы принимаете клиентов?',
+    placeholder:'Например: Москва, Хамовники' },
+
+  // 3. Продвижение
+  { id:'channels', label:'Продвижение сейчас', type:'multi',
+    text:'Что вы сейчас используете для продвижения? Отметьте всё, где вы есть или запускаете рекламу',
+    options:['Instagram','VK','Telegram','TikTok','WhatsApp','Яндекс Карты','2ГИС','Google Карты','Авито','Сайт','Таргетированная реклама','Реклама у блогеров','Сарафанное радио',NONE],
+    exclusive: NONE,
+    react: v => v.includes(NONE) ? 'Ничего страшного — значит, построим всё с чистого листа 🙌' : null },
+
+  // 4. Точка А и цель
+  { id:'pointA', label:'Точка А (сейчас)', type:'text',
+    intro:['Теперь самое важное — где вы сейчас и куда хотите прийти 🚀'],
+    text: a => isSalon(a)
+      ? 'Где вы сейчас? Сколько клиентов в месяц, какая загрузка мастеров, примерная выручка'
+      : 'Где вы сейчас? Сколько клиентов в месяц, насколько заполнена запись, примерный доход',
+    placeholder:'Опишите своими словами' },
+  { id:'goal', label:'Цель', type:'text',
+    text:'Какая у вас цель? К чему хотите прийти и за какой срок?',
+    placeholder:'Например: полная запись и 300 000 ₽ в месяц через полгода' },
+
+  // 5. Бюджет
+  { id:'adBudget', label:'Бюджет на рекламу', type:'text',
+    text:'Какой бюджет на рекламу вы готовы выделять? Можно написать в день или в месяц',
+    placeholder:'Например: 1 000 ₽ в день или 30 000 ₽ в месяц' },
+
+  // Контакты
+  { id:'name', label:'Имя', type:'text',
+    intro:['Спасибо, почти готово!'],
+    text: a => isSalon(a) ? 'Как называется салон и как к вам обращаться?' : 'Как к вам обращаться?',
+    placeholder:'Ваше имя' },
   { id:'contact', label:'Контакт', type:'text',
-    text:'Как с вами удобнее связаться? Напишите Telegram, WhatsApp или телефон', placeholder:'@username или +7…' },
-  { id:'niche', label:'Ниша', type:'choice', text:'В какой нише вы работаете?',
-    options:['Маникюр / педикюр','Брови','Ресницы','Волосы','Макияж','Косметология','Массаж','Другое'], custom:'Другое' },
-  { id:'city', label:'Город и район', type:'text', text:'В каком городе и районе принимаете клиентов?' },
-  { id:'stage', label:'Этап', type:'choice', text:'На каком вы сейчас этапе?',
-    options:[NOVICE,'Работаю до 1 года','1–3 года','Больше 3 лет'],
-    react: v => v === NOVICE
-      ? 'Старт с нуля — отличная возможность сразу выстроить всё правильно, без старых ошибок.'
-      : 'Здорово, опыт уже есть — значит, есть на что опираться.' },
-  { id:'place', label:'Где принимает', type:'choice', text:'Где вы принимаете клиентов?',
-    options:['Дома','Аренда кресла / кабинета','В салоне','Своя студия','Выезд'] },
-  { id:'price', label:'Цена основной услуги', type:'text', text:'Сколько стоит ваша основная услуга?',
-    placeholder:'Например: маникюр с покрытием — 2500 ₽' },
-  { id:'load', label:'Клиентов в неделю (сейчас / макс.)', type:'text',
-    text:'Сколько клиентов в неделю у вас сейчас и сколько вы можете принять максимум?',
-    placeholder:'Например: сейчас 10, максимум 25' },
-
-  // Блок 2. Что уже сделано
-  { id:'platforms', label:'Площадки', type:'multi',
-    intro:['Теперь давайте посмотрим, что у вас уже есть 📱'],
-    text:'Какие площадки у вас уже работают?',
-    options:['Instagram','VK','Telegram-канал','TikTok','Яндекс Карты','2ГИС','Авито','Сайт / Taplink','Онлайн-запись',NOTHING],
-    exclusive: NOTHING,
-    react: v => v.includes(NOTHING) ? 'Ничего страшного — будем строить с чистого листа 🙌' : null },
-  { id:'links', label:'Ссылки', type:'text', optional:true,
-    text:'Пришлите ссылки на ваши страницы', placeholder:'Можно несколько через пробел',
-    skip: a => (a.platforms||[]).includes(NOTHING) },
-  { id:'content', label:'Частота контента', type:'choice', text:'Как часто вы публикуете контент?',
-    options:['Каждый день','Несколько раз в неделю','Редко','Не публикую'],
-    skip: a => (a.platforms||[]).includes(NOTHING) },
-  { id:'portfolio', label:'Портфолио', type:'choice', text:'Есть ли у вас портфолио с качественными фото и видео работ?',
-    options:['Да, хорошие фото и видео','Есть, но качество так себе','Нет'],
-    score:{'Да, хорошие фото и видео':2,'Есть, но качество так себе':1,'Нет':0} },
-  { id:'reviews', label:'Отзывы', type:'choice', text:'Сколько у вас отзывов от клиентов?',
-    options:['Нет пока','До 10','10–50','Больше 50'] },
-  { id:'ads', label:'Запускали рекламу', type:'choice', text:'Вы уже запускали рекламу?', options:['Да','Нет'] },
-  { id:'adsResult', label:'Опыт рекламы', type:'text',
-    text:'Расскажите: где запускали, какой был бюджет и что получилось?',
-    skip: a => a.ads !== 'Да' },
-  { id:'marketer', label:'Работали с маркетологом', type:'choice',
-    text:'Работали ли вы раньше с маркетологом или SMM-специалистом?', options:['Да','Нет'] },
-  { id:'marketerExp', label:'Опыт с маркетологом', type:'text',
-    text:'Что понравилось в той работе, а что нет?',
-    skip: a => a.marketer !== 'Да' },
-
-  // Блок 3. Текущие результаты (для мастеров с опытом)
-  { id:'newClients', label:'Новых клиентов в месяц', type:'choice',
-    intro:['Немного цифр 📊 Можно примерно, точность сейчас не главное.'],
-    text:'Сколько новых клиентов приходит к вам в месяц?',
-    options:['До 5','5–15','15–30','Больше 30'],
-    skip: a => a.stage === NOVICE },
-  { id:'sources', label:'Откуда клиенты', type:'multi', text:'Откуда они приходят чаще всего?',
-    options:['Сарафан','Соцсети','Карты','Авито','Реклама','Другое'],
-    skip: a => a.stage === NOVICE },
-  { id:'repeat', label:'Повторные визиты', type:'choice', text:'Как часто клиенты возвращаются повторно?',
-    options:['Почти не возвращаются','Примерно треть','Около половины','Большинство'],
-    skip: a => a.stage === NOVICE },
-  { id:'income', label:'Доход сейчас', type:'choice', text:'Какой у вас примерный доход в месяц сейчас?',
-    options:['До 50 000 ₽','50–100 000 ₽','100–200 000 ₽','Больше 200 000 ₽'],
-    skip: a => a.stage === NOVICE },
-  { id:'blockers', label:'Что мешает расти', type:'text', text:'Как вы думаете, что мешает расти прямо сейчас?',
-    skip: a => a.stage === NOVICE },
-
-  // Блок 4. Цели
-  { id:'goal3m', label:'Цель на 3 месяца', type:'text',
-    intro:['{name}, а теперь самое интересное — куда вы хотите прийти 🚀'],
-    text:'Какой результат вы хотите получить через 3 месяца?' },
-  { id:'goal1y', label:'Цель на год', type:'text', text:'А через год?' },
-  { id:'incomeGoal', label:'Желаемый доход', type:'text',
-    text:'Какой доход в месяц для вас будет означать «я молодец, получилось»?', placeholder:'Сумма в месяц' },
-  { id:'raisePrice', label:'Поднять цену', type:'choice', text:'Хотите поднять цену на свои услуги?',
-    options:['Да, хочу','Думаю об этом','Нет'] },
-  { id:'bigGoals', label:'Большие цели', type:'multi', text:'Какие большие цели есть на горизонте?',
-    options:['Своя студия','Обучать мастеров','Свой бренд','Переезд в другой город','Пока не думал(а)'],
-    exclusive:'Пока не думал(а)' },
-  { id:'idealClient', label:'Идеальный клиент', type:'text',
-    text:'Опишите вашего идеального клиента: кто он, что для него важно, сколько готов платить?' },
-
-  // Блок 5. Готовность
-  { id:'budget', label:'Бюджет на специалиста', type:'choice',
-    intro:['Последний блок — про готовность действовать 💪'],
-    text:'Какой бюджет в месяц вы готовы вкладывать в работу специалиста по продвижению?',
-    options:['До 10 000 ₽','10–25 000 ₽','25–50 000 ₽','Больше 50 000 ₽'],
-    score:{'До 10 000 ₽':0,'10–25 000 ₽':1,'25–50 000 ₽':2,'Больше 50 000 ₽':3} },
-  { id:'adBudget', label:'Бюджет на рекламу', type:'choice',
-    text:'А отдельно на рекламу в месяц?',
-    options:['Пока не готов(а)','До 10 000 ₽','10–30 000 ₽','Больше 30 000 ₽'],
-    score:{'Пока не готов(а)':0,'До 10 000 ₽':1,'10–30 000 ₽':2,'Больше 30 000 ₽':3} },
-  { id:'time', label:'Время на контент в неделю', type:'choice',
-    text:'Сколько времени в неделю вы готовы уделять съёмкам, контенту и обратной связи?',
-    options:['До 2 часов','2–5 часов','Больше 5 часов'],
-    score:{'До 2 часов':0,'2–5 часов':1,'Больше 5 часов':2} },
-  { id:'showSelf', label:'Готовность показывать себя', type:'choice',
-    text:'Готовы ли вы показывать себя в сторис и видео, а не только работы?',
-    options:['Да, легко','Готов(а) попробовать','Нет, только работы'],
-    score:{'Да, легко':2,'Готов(а) попробовать':1,'Нет, только работы':0} },
-  { id:'readiness', label:'Готовность внедрять (1–10)', type:'scale',
-    text:'Насколько вы готовы внедрять рекомендации, даже если они непривычные? Оцените от 1 до 10',
-    react: v => v >= 8 ? 'Вот это настрой! 🔥' : (v <= 4 ? 'Спасибо за честность, это важно.' : null) },
-  { id:'start', label:'Когда старт', type:'choice', text:'И последний вопрос: когда хотите начать?',
-    options:['Прямо сейчас','В течение месяца','Пока присматриваюсь'],
-    score:{'Прямо сейчас':2,'В течение месяца':1,'Пока присматриваюсь':0} }
+    text:'Оставьте номер телефона или ник в Telegram, и мы с вами свяжемся',
+    placeholder:'+7 999 123-45-67 или @username',
+    validate: v => (v.replace(/\D/g, '').length >= 10 || /@[a-zA-Z0-9_]{3,}|t\.me\//.test(v))
+      ? null
+      : 'Кажется, контакт неполный. Напишите номер телефона целиком или ник в Telegram через @' }
 ];
+
 
 /* ================== ДВИЖОК ЧАТА ================== */
 const chat = document.getElementById('chat');
@@ -296,6 +249,7 @@ function idle(){
 function renderText(q, done){
   const row = el('div', 'inputrow inputbox');
   const ta = el('textarea'); ta.rows = 1; ta.placeholder = q.placeholder || 'Напишите ответ…';
+  if (q.inputmode) ta.inputMode = q.inputmode;
   const btn = el('button', 'send'); btn.type = 'button'; btn.innerHTML = SEND_ICON; btn.disabled = true;
   btn.setAttribute('aria-label', 'Отправить');
   const submit = () => { const v = ta.value.trim(); if (v) done(v); };
@@ -359,45 +313,15 @@ function renderScale(q, done){
   composer.append(wrap, legend);
 }
 
+function isActive(q){
+  if (CONFIG.SHORT_MODE && !SHORT_IDS.includes(q.id)) return false;
+  return !(q.skip && q.skip(A));
+}
+
 function updateProgress(){
-  const visible = QUESTIONS.filter(q => !(q.skip && q.skip(A)));
+  const visible = QUESTIONS.filter(isActive);
   const answered = visible.filter(q => q.id in A).length;
   progressBar.style.width = Math.round(answered / visible.length * 100) + '%';
-}
-
-/* ================== ОЦЕНКА ================== */
-function evaluate(){
-  let score = 0, max = 0;
-  QUESTIONS.forEach(q => {
-    if (!q.score) return;
-    max += Math.max(...Object.values(q.score));
-    if (q.score[A[q.id]] != null) score += q.score[A[q.id]];
-  });
-  const rd = A.readiness || 0;
-  score += rd >= 9 ? 3 : rd >= 7 ? 2 : rd >= 5 ? 1 : 0; max += 3;
-
-  const flags = [];
-  if (rd < 5) flags.push('готовность внедрять ниже 5');
-  if (A.start === 'Пока присматриваюсь') flags.push('не готов(а) стартовать');
-  if (A.budget === 'До 10 000 ₽' && A.adBudget === 'Пока не готов(а)') flags.push('нет бюджета');
-  if (A.time === 'До 2 часов' && A.showSelf === 'Нет, только работы') flags.push('нет времени и готовности к контенту');
-
-  let zone = 'Жёлтая';
-  if (rd < 5 || flags.length >= 2 || score <= max * 0.35) zone = 'Красная';
-  else if (flags.length === 0 && score >= max * 0.7) zone = 'Зелёная';
-  return { score, max, zone, flags };
-}
-
-function growthZones(){
-  const p = A.platforms || [];
-  const g = [];
-  if (p.includes(NOTHING) || p.length <= 1) g.push('площадки');
-  if (p.includes(NOTHING) || ['Редко','Не публикую'].includes(A.content)) g.push('регулярный контент');
-  if (A.portfolio !== 'Да, хорошие фото и видео') g.push('портфолио');
-  if (['Нет пока','До 10'].includes(A.reviews)) g.push('отзывы');
-  if (!p.includes('Онлайн-запись')) g.push('онлайн-запись');
-  if (A.ads === 'Нет') g.push('реклама');
-  return g;
 }
 
 const plural = (n, f) => f[(n % 10 === 1 && n % 100 !== 11) ? 0 : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? 1 : 2];
@@ -415,40 +339,40 @@ async function send(payload){
 }
 
 /* ================== СЦЕНАРИЙ ================== */
+function collect(){
+  const answers = Object.fromEntries(Object.entries(A).map(([k, v]) => [k, Array.isArray(v) ? v.join(', ') : v]));
+  const fields = QUESTIONS.filter(q => !CONFIG.SHORT_MODE || SHORT_IDS.includes(q.id))
+    .map(q => ({ label: q.label, value: answers[q.id] ?? '' }));
+  return { answers, fields };
+}
+
 async function finish(){
   composer.innerHTML = '';
-  const ev = evaluate();
-  const gaps = growthZones();
+  const { answers, fields } = collect();
   const payload = {
-    zone: ev.zone,
-    score: ev.score,
-    max: ev.max,
-    flags: ev.flags,
-    gaps: gaps,
-    answers: Object.fromEntries(Object.entries(A).map(([k, v]) => [k, Array.isArray(v) ? v.join(', ') : v])),
-    fields: [
-      { label:'Зона', value: ev.zone },
-      { label:'Баллы', value: `${ev.score} из ${ev.max}` },
-      { label:'Стоп-факторы', value: ev.flags.join('; ') },
-      { label:'Зоны роста', value: gaps.join(', ') },
-      ...QUESTIONS.map(q => ({ label:q.label, value: Array.isArray(A[q.id]) ? A[q.id].join(', ') : (A[q.id] ?? '') }))
-    ]
+    short: CONFIG.SHORT_MODE,
+    answers,
+    fields: [{ label:'Тип заявки', value: CONFIG.SHORT_MODE ? 'Короткая' : 'Анкета' }, ...fields]
   };
   const sending = send(payload);
 
-  await bot(`${A.name}, спасибо! Анкета заполнена ✅`);
-  await bot('Вы только что сделали то, на что многие мастера не решаются годами: честно посмотрели на свою точку А и назвали свою точку Б.');
-  if (gaps.length){
-    await bot(`Посмотрите на свои ответы. Мы видим у вас ${gaps.length} ${plural(gaps.length, ['зону','зоны','зон'])} роста: ${gaps.join(', ')}.`);
-    await bot('Это не слабые места. Это ваш резерв — именно там спрятаны новые клиенты и новый доход.');
-    await bot('Если многое из этого вы ещё не делали, впереди много работы. И это отличная новость: значит, ваш потолок гораздо выше, чем кажется сейчас.');
+  await bot(`${A.name}, спасибо! ✅`);
+  if (CONFIG.SHORT_MODE){
+    await bot('Мы получили ваши контакты и свяжемся с вами в ближайшее время.');
   } else {
-    await bot('У вас уже крепкая база: площадки, контент, портфолио, отзывы, реклама. Теперь задача — превратить её в систему и вырасти в цифрах.');
+    await bot('Вы только что сделали то, на что многие не решаются годами: честно описали, где вы сейчас, и назвали свою цель.');
+    const ch = (A.channels || []).filter(c => c !== NONE);
+    if (ch.length === 0){
+      await bot('Продвижение пока не выстроено — и это хорошая новость. Значит, ваш потолок гораздо выше, чем кажется сейчас.');
+    } else if (ch.length <= 3){
+      await bot(`Сейчас вы используете ${ch.length} ${plural(ch.length, ['канал','канала','каналов'])} продвижения. Каждый неиспользованный канал — это не слабость, а резерв новых клиентов.`);
+    } else {
+      await bot('У вас уже есть база: несколько каналов продвижения. Теперь задача — превратить их в систему, которая стабильно приводит клиентов.');
+    }
+    await bot('Если многое из этого вы ещё не делали — впереди много работы. Но теперь у вас есть точка А и точка Б, а значит, можно построить маршрут.');
+    await bot('Мы изучим ваши ответы и свяжемся с вами в течение 24 часов.');
+    await bot('А пока подумайте: какой один шаг к цели вы можете сделать уже сегодня? 🔥');
   }
-  await bot('Мастера, у которых сегодня запись на месяц вперёд, тоже начинали с пустой страницы и первой публикации.');
-  await bot('Мы изучим ваши ответы и свяжемся с вами в течение 24 часов.');
-  await bot('А пока подумайте: какой один шаг из этой анкеты вы можете сделать уже сегодня? 🔥');
-
   const ok = await sending;
   note(ok ? 'Ответы отправлены' : 'Не получилось отправить ответы. Проверьте интернет и обновите страницу.');
   progressBar.style.width = '100%';
@@ -457,15 +381,25 @@ async function finish(){
 async function run(){
   idle();
   await bot('Привет! 👋');
-  await bot('Я задам вам несколько вопросов о вашей работе и целях. Это займёт 10–15 минут.');
-  await bot('Отвечайте честно: здесь нет правильных и неправильных ответов, есть только ваша точка старта.');
+  if (CONFIG.SHORT_MODE){
+    await bot('Оставьте, пожалуйста, имя и контакт — это займёт полминуты.');
+  } else {
+    await bot('Ответьте на 5 коротких вопросов — это займёт 2–3 минуты.');
+    await bot('По ответам мы поймём, где вы сейчас и чем можем помочь именно вам.');
+  }
   for (const q of QUESTIONS){
-    if (q.skip && q.skip(A)) continue;
-    for (const m of (q.intro || [])) await bot(fill(m));
+    if (!isActive(q)) continue;
+    if (!CONFIG.SHORT_MODE) for (const m of (q.intro || [])) await bot(fill(m));
     await bot(fill(typeof q.text === 'function' ? q.text(A) : q.text));
-    const r = await ask(q);
+    let r;
+    while (true){
+      r = await ask(q);
+      user(r.display);
+      const error = q.validate ? q.validate(r.value) : null;
+      if (!error) break;
+      await bot(error);
+    }
     A[q.id] = r.value;
-    user(r.display);
     updateProgress();
     if (q.react){ const m = q.react(r.value, A); if (m) await bot(fill(m)); }
   }
