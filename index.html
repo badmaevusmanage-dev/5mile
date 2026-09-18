@@ -505,7 +505,7 @@ button{font:inherit;color:inherit}
           <input id="q" type="text" autocomplete="off" spellcheck="false" data-i18n-ph="phQuery" data-i18n-aria="phQuery">
           <button class="search-go" id="go" data-i18n="btnFind"></button>
         </div>
-        <div class="suggest" id="suggest" role="listbox" aria-label="Подсказки"></div>
+        <div class="suggest" id="suggest" role="listbox" data-i18n-aria="ariaSuggest"></div>
         <div class="svc-row">
           <label class="eyebrow" for="svc" data-i18n="lblService"></label>
           <select id="svc" data-i18n-aria="lblService"></select>
@@ -513,8 +513,8 @@ button{font:inherit;color:inherit}
         <div class="search-hint">
           <button class="chip" data-ex="440 E 89th St, New York">440 E 89th St</button>
           <button class="chip" data-ex="10001">10001</button>
-          <button class="chip" data-ex="Чикаго">Чикаго</button>
-          <button class="chip" data-ex="Остин">Остин</button>
+          <button class="chip" data-city="Chicago">Chicago</button>
+          <button class="chip" data-city="Austin">Austin</button>
         </div>
       </div>
     </div>
@@ -541,8 +541,8 @@ button{font:inherit;color:inherit}
     </div>
 
     <div class="zoomer">
-      <button id="zin" aria-label="Приблизить">+</button>
-      <button id="zout" aria-label="Отдалить">−</button>
+      <button id="zin" data-i18n-aria="ariaZoomIn">+</button>
+      <button id="zout" data-i18n-aria="ariaZoomOut">−</button>
     </div>
 
     <div class="readout" id="readout">
@@ -578,8 +578,8 @@ button{font:inherit;color:inherit}
   <a href="#">hello@example.com</a><a href="#">Telegram</a><a href="#" data-i18n="footPolicy"></a>
 </footer>
 
-<div class="overlay" id="ov-profile"><div class="scrim" data-close></div><div class="pcard" id="pcard" role="dialog" aria-modal="true" aria-label="Профиль мастера"></div></div>
-<div class="overlay" id="ov-apply"><div class="scrim" data-close></div><div class="acard" id="acard" role="dialog" aria-modal="true" aria-label="Заявка"></div></div>
+<div class="overlay" id="ov-profile"><div class="scrim" data-close></div><div class="pcard" id="pcard" role="dialog" aria-modal="true" data-i18n-aria="ariaProfile"></div></div>
+<div class="overlay" id="ov-apply"><div class="scrim" data-close></div><div class="acard" id="acard" role="dialog" aria-modal="true" data-i18n-aria="ariaApply"></div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
@@ -927,9 +927,9 @@ ru:{
  sugCities:"Города сети", sugAddr:"Адреса", sugBusy:"Ищем адреса…", sugSoon:"Скоро", sugFree:"Свободно", sugMast:"маст.", sugExact:"Точно",
  idleMasters:"Мастера в сети", idleFree:"Города без мастеров", idleAllFree:"Все слоты свободны",
  idleNoCity:"Не нашли свой город? Всё равно оставьте заявку — города открываем по спросу.",
- idleApplyAny:"Оставить заявку без города", profile:"Профиль", reachWord:"local host",
+ idleApplyAny:"Оставить заявку без города", profile:"Профиль", reachWord:"охват",
  step2:"Шаг 2 · Статус зоны", coordsOnMap:"Координаты на карте", cityMasters:"Мастера рядом",
- fNearest:"Ближайший город сети", fFreeSvc:"Свободных услуг", fOf:"из", fReach:"Месячный local host", fCoords:"Координаты", fAnswer:"Ответ на заявку", fAnswerV:"до 2 рабочих дней",
+ fNearest:"Ближайший город сети", fFreeSvc:"Свободных услуг", fOf:"из", fReach:"Месячный охват", fCoords:"Координаты", fAnswer:"Ответ на заявку", fAnswerV:"до 2 рабочих дней",
  btnApply:"Подать заявку", btnWait:"Встать в лист ожидания", btnBack:"Вернуться к карте",
  vBusyTag:"Слот занят", vBusyTitle:"«{svc}» — зона занята", vBusyText:"В {mi} милях отсюда уже работает наш мастер: {name}. Мы держим одного мастера на зону, но можем поставить вас в лист ожидания.",
  vNoneTag:"Города пока нет", vNoneTitle:"Этого города ещё нет в сети", vNoneText:"Мы открываем города по заявкам. Расскажите о себе — если наберётся спрос, запустим город и вернёмся к вам первыми.",
@@ -957,7 +957,9 @@ ru:{
  tOnlyUS:"Ищем только по США. Добавьте город: «440 E 89th St, New York»", tNotFound:"Не нашли адрес — попробуйте добавить город",
  tGeoDown:"Геокодер недоступен — выберите город на карте", tDetecting:"Определяем место…", tSent:"Заявка отправлена · ", tCopied:"Ссылка скопирована",
  tWrite:"Здесь подключается чат или переход в профиль мастера", tDbDown:"База недоступна — показаны демо-данные", tSendFail:"Не удалось отправить — попробуйте ещё раз",
- mapPoint:"Точка на карте", milesShort:"миль"
+ mapPoint:"Точка на карте", milesShort:"миль", mln:"млн",
+ pageTitle:"Карта сети · Найдите свой город · local host", pageDesc:"Интерактивная карта сети мастеров. Найдите город и услугу — узнайте, свободен ли слот, и подайте заявку.",
+ ariaSuggest:"Подсказки", ariaZoomIn:"Приблизить", ariaZoomOut:"Отдалить", ariaProfile:"Профиль мастера", ariaApply:"Заявка"
 },
 en:{
  close:"Close", fav:"Save", brandName:"local host", geo401:"Mapbox: invalid token (401)", geo403:"Mapbox: domain not allowed in token settings (403)", geo422:"Mapbox: query not recognised (422)",
@@ -1007,7 +1009,9 @@ en:{
  tOnlyUS:"We search the US only. Add the city: \"440 E 89th St, New York\"", tNotFound:"Address not found — try adding the city",
  tGeoDown:"Search is unavailable — pick a city on the map", tDetecting:"Locating…", tSent:"Application sent · ", tCopied:"Link copied",
  tWrite:"This is where chat or the pro's profile would open", tDbDown:"Database unavailable — showing demo data", tSendFail:"Couldn't send — please try again",
- mapPoint:"Point on the map", milesShort:"miles"
+ mapPoint:"Point on the map", milesShort:"miles", mln:"M",
+ pageTitle:"Network map · Find your city · local host", pageDesc:"Interactive map of our network of pros. Find your city and service, check whether the slot is open and apply.",
+ ariaSuggest:"Suggestions", ariaZoomIn:"Zoom in", ariaZoomOut:"Zoom out", ariaProfile:"Pro profile", ariaApply:"Application"
 },
 es:{
  close:"Cerrar", fav:"Guardar", brandName:"local host", geo401:"Mapbox: token inválido (401)", geo403:"Mapbox: dominio no permitido en el token (403)", geo422:"Mapbox: consulta no reconocida (422)",
@@ -1057,7 +1061,9 @@ es:{
  tOnlyUS:"Buscamos solo en EE. UU. Añade la ciudad: «440 E 89th St, New York»", tNotFound:"No encontramos la dirección — prueba añadiendo la ciudad",
  tGeoDown:"Búsqueda no disponible — elige una ciudad en el mapa", tDetecting:"Localizando…", tSent:"Solicitud enviada · ", tCopied:"Enlace copiado",
  tWrite:"Aquí se abriría el chat o el perfil del profesional", tDbDown:"Base de datos no disponible — datos de demostración", tSendFail:"No se pudo enviar — inténtalo de nuevo",
- mapPoint:"Punto en el mapa", milesShort:"millas"
+ mapPoint:"Punto en el mapa", milesShort:"millas", mln:"M",
+ pageTitle:"Mapa de la red · Encuentra tu ciudad · local host", pageDesc:"Mapa interactivo de la red de profesionales. Encuentra tu ciudad y servicio, comprueba si el puesto está libre y postula.",
+ ariaSuggest:"Sugerencias", ariaZoomIn:"Acercar", ariaZoomOut:"Alejar", ariaProfile:"Perfil del profesional", ariaApply:"Solicitud"
 }
 };
 
@@ -1083,6 +1089,23 @@ function svcName(id){
   const s=SERVICES.find(x=>x.id===id); if(!s) return '—';
   return s[LANG] || s.en || s.ru;
 }
+/* страна и охват: в базе хранятся по-русски, на экране — на языке сайта */
+const COUNTRIES={
+ "США":{en:"USA",es:"EE. UU."},"Канада":{en:"Canada",es:"Canadá"},"Великобритания":{en:"UK",es:"Reino Unido"},
+ "Франция":{en:"France",es:"Francia"},"Германия":{en:"Germany",es:"Alemania"},"Испания":{en:"Spain",es:"España"},
+ "Нидерланды":{en:"Netherlands",es:"Países Bajos"},"Италия":{en:"Italy",es:"Italia"},"Португалия":{en:"Portugal",es:"Portugal"},
+ "Польша":{en:"Poland",es:"Polonia"},"Чехия":{en:"Czechia",es:"Chequia"},"Австрия":{en:"Austria",es:"Austria"},
+ "Швеция":{en:"Sweden",es:"Suecia"},"Дания":{en:"Denmark",es:"Dinamarca"},"Швейцария":{en:"Switzerland",es:"Suiza"},
+ "Турция":{en:"Turkey",es:"Turquía"},"Россия":{en:"Russia",es:"Rusia"},"Казахстан":{en:"Kazakhstan",es:"Kazajistán"},
+ "Узбекистан":{en:"Uzbekistan",es:"Uzbekistán"},"Грузия":{en:"Georgia",es:"Georgia"},"Армения":{en:"Armenia",es:"Armenia"},
+ "Азербайджан":{en:"Azerbaijan",es:"Azerbaiyán"},"ОАЭ":{en:"UAE",es:"EAU"},"Израиль":{en:"Israel",es:"Israel"},
+ "Япония":{en:"Japan",es:"Japón"},"Корея":{en:"South Korea",es:"Corea del Sur"},"Сингапур":{en:"Singapore",es:"Singapur"},
+ "Таиланд":{en:"Thailand",es:"Tailandia"},"Индия":{en:"India",es:"India"},"Австралия":{en:"Australia",es:"Australia"},
+ "Мексика":{en:"Mexico",es:"México"},"Бразилия":{en:"Brazil",es:"Brasil"},"Аргентина":{en:"Argentina",es:"Argentina"},
+ "ЮАР":{en:"South Africa",es:"Sudáfrica"}
+};
+function countryName(c){ if(!c||LANG==='ru') return c||''; return (COUNTRIES[c]&&COUNTRIES[c][LANG]) || c }
+function reachText(r){ return r ? String(r).replace(/\s*млн\.?/,' '+t('mln')) : r }
 /* тексты мастера: из базы могут прийти bio_en, quote_es и т.д. */
 function mtext(m,field){
   return m[field+'_'+LANG] || m[field] || '';
@@ -1098,6 +1121,11 @@ function applyStatic(){
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder=t(el.dataset.i18nPh));
   document.querySelectorAll('[data-i18n-aria]').forEach(el=>el.setAttribute('aria-label',t(el.dataset.i18nAria)));
   document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('on',b.dataset.lang===LANG));
+  document.title=t('pageTitle');
+  const md=document.querySelector('meta[name="description"]'); if(md) md.content=t('pageDesc');
+  document.querySelectorAll('.chip[data-city]').forEach(b=>{
+    const k=b.dataset.city, c=CITIES.find(x=>x.n===k)||ALL_CITIES.find(x=>x.n===k);
+    b.textContent=c?cityName(c):k });
 }
 
 function setLang(code){
@@ -1277,7 +1305,7 @@ function renderIdle(){
     <div class="pad"><div class="sect-label"><span class="eyebrow">${t('idleFree')}</span></div></div>
     ${free.map(c=>`
       <button class="idle-row" data-city="${c.n}"><i class="dot live"></i>
-        <span><span class="idle-city">${esc(cityName(c))}</span><br><span class="idle-country">${esc(c.c)} · ${t('reachWord')} ${esc(c.reach)}</span></span>
+        <span><span class="idle-city">${esc(cityName(c))}</span><br><span class="idle-country">${esc(countryName(c.c))} · ${t('reachWord')} ${esc(reachText(c.reach))}</span></span>
         <span class="idle-status tag free">${t('idleAllFree')}</span></button>`).join('')}
     <div class="pad">
       <p style="color:var(--slate);font-size:12.5px;margin:0 0 14px">${t('idleNoCity')}</p>
@@ -1298,7 +1326,7 @@ function renderResult(place){
     <div class="result-head">
       <span class="eyebrow">${t('step2')}</span>
       <h2 class="result-city">${esc(place.name)}</h2>
-      <p class="result-sub">${esc(place.country||t('coordsOnMap'))}${place.svc?' · '+esc(svcName(place.svc)):''}</p>
+      <p class="result-sub">${esc(countryName(place.country)||t('coordsOnMap'))}${place.svc?' · '+esc(svcName(place.svc)):''}</p>
       <div class="verdict ${v.k}">
         <span class="tag ${v.k}">${v.tag}</span>
         <h3>${v.title}</h3><p>${v.text}</p>
@@ -1312,7 +1340,7 @@ function renderResult(place){
     <dl class="facts">
       ${place.nearName?`<div class="fact"><dt>${t('fNearest')}</dt><dd>${esc(place.nearName)}${place.nearKm>1?' · '+place.nearKm+' km':''}</dd></div>`:''}
       ${city?`<div class="fact"><dt>${t('fFreeSvc')}</dt><dd class="num">${freeSvc.length} ${t('fOf')} ${SERVICES.length}</dd></div>`:''}
-      ${place.reach?`<div class="fact"><dt>${t('fReach')}</dt><dd class="num">${esc(place.reach)}</dd></div>`:''}
+      ${place.reach?`<div class="fact"><dt>${t('fReach')}</dt><dd class="num">${esc(reachText(place.reach))}</dd></div>`:''}
       <div class="fact"><dt>${t('fCoords')}</dt><dd class="num">${place.lat.toFixed(3)}, ${place.lng.toFixed(3)}</dd></div>
       <div class="fact"><dt>${t('fAnswer')}</dt><dd>${t('fAnswerV')}</dd></div>
     </dl>
@@ -1363,7 +1391,7 @@ function openMaster(m,fly){
       ${avatar(m)}
       <button class="side-close" data-side-close aria-label="${t('close')}">✕</button>
       <div class="side-hero-txt">
-        <span class="eyebrow">${esc(cityName(c))}, ${esc(c.c)}</span>
+        <span class="eyebrow">${esc(cityName(c))}, ${esc(countryName(c.c))}</span>
         <h3>${esc(m.name)}</h3>
       </div>
     </div>
@@ -1418,7 +1446,7 @@ function openProfile(m){
       <button class="icon-btn fav" data-fav aria-label="${t('fav')}">♥</button>
       <button class="icon-btn close" data-close-p aria-label="${t('close')}">✕</button>
       <div class="pcard-hero-txt">
-        <span class="eyebrow">${esc(cityName(c))}, ${esc(c.c)}</span>
+        <span class="eyebrow">${esc(cityName(c))}, ${esc(countryName(c.c))}</span>
         <h2>${esc(m.name)}</h2>
       </div>
     </div>
@@ -1783,7 +1811,7 @@ function renderSuggest(){
     html+=cities.map(c=>{
       const n=mastersOf(c.n).length;
       return `<button class="suggest-item" data-city="${c.n}"><i class="dot ${c.s}"></i>
-        <span class="suggest-name">${esc(cityName(c))} <span style="color:var(--slate)">· ${esc(c.c)}</span></span>
+        <span class="suggest-name">${esc(cityName(c))} <span style="color:var(--slate)">· ${esc(countryName(c.c))}</span></span>
         <span class="suggest-meta">${c.s==='soon'?t('sugSoon'):(n?n+' '+t('sugMast'):t('sugFree'))}</span></button>`}).join('');
   }
   if(remoteHits.length){
@@ -1893,7 +1921,7 @@ qEl.addEventListener('keydown',e=>{
 qEl.addEventListener('focus',renderSuggest);
 document.addEventListener('click',e=>{if(!e.target.closest('.search'))sugEl.classList.remove('on')});
 $('#go').onclick=runSearch;
-document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{qEl.value=b.dataset.ex;remoteHits=[];runSearch()});
+document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{qEl.value=b.dataset.ex||b.textContent;remoteHits=[];runSearch()});
 
 let clickLock=false;
 map.on('click',async e=>{
