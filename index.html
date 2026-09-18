@@ -1164,9 +1164,13 @@ function verdict(place){
    3. КАРТА
    ======================================================================= */
 const map = L.map('map',{zoomControl:false,minZoom:2,maxZoom:14,worldCopyJump:true,zoomSnap:.5}).setView(HOME_VIEW.center,HOME_VIEW.zoom);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_nolabels/{z}/{x}/{y}{r}.png',
+/* Ключ CARTO: бесплатно на carto.com/basemaps/apikey (до 5 млн тайлов в месяц).
+   Без ключа карта работает, но на ней надпись «API KEY REQUIRED». */
+const CARTO_KEY = "cb1_3pts_1_22adef5e7f57e8d41686fc81";   // ← сюда ключ CARTO
+const CARTO_Q = CARTO_KEY ? '?key='+encodeURIComponent(CARTO_KEY) : '';
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_nolabels/{z}/{x}/{y}{r}.png'+CARTO_Q,
   {subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap · © CARTO'}).addTo(map);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_only_labels/{z}/{x}/{y}{r}.png',
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_only_labels/{z}/{x}/{y}{r}.png'+CARTO_Q,
   {subdomains:'abcd',maxZoom:19,opacity:.75,attribution:''}).addTo(map);
 
 const cityMarkers=new Map(), mstrMarkers=new Map();
