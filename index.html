@@ -329,7 +329,7 @@ button{font:inherit;color:inherit}
 .pcard-note{border-top:1px solid var(--rule);padding:14px 26px;flex:none}
 
 .acard{position:relative;width:min(1000px,100%);max-height:min(90svh,860px);background:var(--card);border-radius:var(--r-card);
-  box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-columns:400px 1fr;
+  box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-columns:400px 1fr;grid-template-rows:minmax(0,1fr);
   animation:rise .4s cubic-bezier(.2,.8,.25,1) both}
 .aside-visual{position:relative;background:#100E0C;color:#FCFBF9;padding:26px;display:flex;flex-direction:column;overflow:hidden}
 .aside-visual::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 20% 0%,#2C3A34 0%,#171614 45%,#100E0C 100%)}
@@ -350,7 +350,7 @@ button{font:inherit;color:inherit}
 .av-foot{margin-top:20px;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:rgba(252,251,249,.5)}
 .av-map{position:absolute;right:-70px;bottom:-50px;width:320px;opacity:.16;z-index:1}
 
-.aform{padding:30px 34px;overflow-y:auto;position:relative}
+.aform{padding:30px 34px;overflow-y:auto;position:relative;min-height:0;max-height:inherit;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .aform h2{font-family:var(--serif);font-weight:300;font-size:31px;margin:12px 0 6px;letter-spacing:-.02em}
 .aform .lede{color:var(--slate);font-size:13.5px;margin:0 0 22px}
 .field{margin-bottom:16px}
