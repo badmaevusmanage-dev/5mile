@@ -94,8 +94,10 @@ button{font:inherit;color:inherit}
   font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--slate);transition:.15s}
 .lang-btn:hover{color:var(--ink)}
 .lang-btn.on{background:var(--ink);color:var(--paper)}
+#cta-top{white-space:nowrap}
+@media (max-width:760px){.brand-sub{display:none}.brand-mark{white-space:nowrap}}
 @media (max-width:560px){.langs{padding:1px}.lang-btn{padding:5px 8px;font-size:9px}
-  .topbar{gap:10px;padding:0 14px}.brand-sub{display:none}.brand-mark{font-size:15px!important;white-space:nowrap}.brand{gap:7px}
+  .topbar{gap:10px;padding:0 14px}.brand-mark{font-size:15px!important;white-space:nowrap}.brand{gap:7px}
   #cta-top{padding:8px 12px;font-size:12px;white-space:nowrap}}
 @media (max-width:360px){.brand-dot{display:none}#cta-top{padding:7px 10px;font-size:11px}}
 
@@ -2118,6 +2120,286 @@ if(DB){
 }else{
   console.info('[база] Supabase не подключён — демо-данные из файла');
 }
+</script>
+
+<!-- ==========================================================
+     ПОМОЩНИК — пиксельный персонаж + чат (сценарии, без AI)
+     ========================================================== -->
+<style>
+.buddy{position:fixed;right:18px;bottom:18px;z-index:1500;display:flex;flex-direction:column;align-items:flex-end;gap:10px;pointer-events:none}
+.buddy > *{pointer-events:auto}
+.buddy-btn{width:76px;height:76px;border:0;background:transparent;padding:0;cursor:pointer;position:relative;
+  filter:drop-shadow(0 10px 14px rgba(40,20,120,.28));transition:transform .18s}
+.buddy-btn:hover{transform:translateY(-3px) scale(1.04)}
+.buddy-btn:active{transform:scale(.96)}
+.buddy-bot{display:block;width:100%;height:100%;animation:buddy-bob 2.6s ease-in-out infinite}
+.buddy-eyes{transform-box:fill-box;transform-origin:center;animation:buddy-blink 4.2s infinite}
+@keyframes buddy-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes buddy-blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.15)}}
+.buddy-dot{position:absolute;right:6px;top:8px;width:12px;height:12px;border-radius:50%;background:var(--lime);border:2px solid var(--paper);display:none}
+.buddy.nudge .buddy-dot{display:block}
+.buddy-tip{max-width:230px;background:var(--card);border:1px solid var(--rule);border-radius:16px 16px 4px 16px;padding:11px 32px 11px 14px;
+  font-size:13.5px;line-height:1.45;color:var(--ink);box-shadow:var(--shadow);position:relative;cursor:pointer;
+  opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s;visibility:hidden}
+.buddy.nudge .buddy-tip{opacity:1;transform:none;visibility:visible}
+.buddy-tip-x{position:absolute;right:6px;top:6px;width:22px;height:22px;border:0;background:transparent;border-radius:50%;cursor:pointer;color:var(--slate);font-size:14px;line-height:1}
+.buddy-tip-x:hover{background:var(--vellum);color:var(--ink)}
+
+.chat{position:fixed;right:18px;bottom:106px;z-index:1500;width:370px;height:min(560px,calc(100svh - 140px));
+  display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--rule);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;
+  opacity:0;transform:translateY(14px) scale(.98);transform-origin:bottom right;pointer-events:none;transition:opacity .22s,transform .22s}
+.chat.on{opacity:1;transform:none;pointer-events:auto}
+.chat-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--rule);background:var(--card)}
+.chat-av{width:38px;height:38px;border-radius:12px;background:var(--np-wash);display:grid;place-items:center;flex:none}
+.chat-av svg{width:30px;height:30px}
+.chat-title{font-weight:600;font-size:14.5px;letter-spacing:-.01em;line-height:1.2}
+.chat-sub{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--slate)}
+.chat-sub i{width:6px;height:6px;border-radius:50%;background:var(--open)}
+.chat-x{margin-left:auto;width:32px;height:32px;border-radius:50%;border:0;background:transparent;cursor:pointer;color:var(--ink-2);font-size:18px}
+.chat-x:hover{background:var(--vellum)}
+.chat-log{flex:1;overflow-y:auto;padding:16px 14px 8px;display:flex;flex-direction:column;gap:8px;overscroll-behavior:contain}
+.msg{max-width:86%;padding:10px 13px;border-radius:16px;font-size:14px;line-height:1.5;white-space:pre-line;animation:msg-in .22s ease-out both}
+.msg a{color:inherit;font-weight:600}
+.msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--rule);border-bottom-left-radius:5px}
+.msg.me{align-self:flex-end;background:var(--np);color:#fff;border-bottom-right-radius:5px}
+@keyframes msg-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.typing{display:inline-flex;gap:4px;padding:13px 14px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--slate);animation:dot 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes dot{0%,60%,100%{opacity:.25;transform:none}30%{opacity:1;transform:translateY(-3px)}}
+.quick{display:flex;flex-wrap:wrap;gap:6px;padding:4px 14px 10px}
+.qbtn{border:1px solid var(--rule-2);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 12px;font-family:var(--sans);font-size:13px;cursor:pointer;transition:.15s}
+.qbtn:hover{border-color:var(--np);color:var(--np);background:var(--np-wash)}
+.chat-in{display:flex;align-items:center;gap:6px;padding:10px 10px 12px;border-top:1px solid var(--rule);background:var(--card)}
+.chat-in input{flex:1;min-width:0;border:1px solid var(--rule-2);border-radius:999px;padding:10px 14px;font-family:var(--sans);font-size:16px;background:var(--paper);color:var(--ink);outline:none}
+.chat-in input:focus{border-color:var(--np)}
+.chat-ib{width:40px;height:40px;flex:none;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;background:var(--vellum);color:var(--ink-2)}
+.chat-ib.send{background:var(--np);color:#fff}
+.chat-ib:disabled{opacity:.45;cursor:default}
+.chat-note{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate);text-align:center;padding:0 0 8px;background:var(--card)}
+
+@media (max-width:640px){
+  .buddy{right:12px;bottom:12px}
+  .buddy-btn{width:62px;height:62px}
+  .buddy-tip{max-width:200px;font-size:13px}
+  .chat{left:8px;right:8px;bottom:8px;width:auto;height:min(78svh,620px);border-radius:20px}
+  .chat.on ~ .buddy, body.chat-open .buddy{display:none}
+}
+</style>
+
+<div class="buddy" id="buddy">
+  <div class="buddy-tip" id="buddy-tip" role="status"><span id="buddy-tip-txt"></span><button class="buddy-tip-x" id="buddy-tip-x" aria-label="×">×</button></div>
+  <button class="buddy-btn" id="buddy-btn" aria-haspopup="dialog" aria-controls="chat">
+    <svg class="buddy-bot" id="buddy-svg" viewBox="0 0 16 17" shape-rendering="crispEdges" aria-hidden="true"></svg>
+    <span class="buddy-dot"></span>
+  </button>
+</div>
+
+<section class="chat" id="chat" role="dialog" aria-modal="false" aria-labelledby="chat-title">
+  <header class="chat-head">
+    <div class="chat-av"><svg viewBox="0 0 16 17" shape-rendering="crispEdges" aria-hidden="true" id="chat-av-svg"></svg></div>
+    <div><div class="chat-title" id="chat-title"></div><div class="chat-sub"><i></i><span id="chat-sub"></span></div></div>
+    <button class="chat-x" id="chat-x" aria-label="×">×</button>
+  </header>
+  <div class="chat-log" id="chat-log" aria-live="polite"></div>
+  <div class="quick" id="chat-quick"></div>
+  <form class="chat-in" id="chat-form" autocomplete="off">
+    <input id="chat-text" type="text" enterkeyhint="send">
+    <button type="button" class="chat-ib" id="chat-mic" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg></button>
+    <button type="submit" class="chat-ib send" id="chat-send">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+  </form>
+  <div class="chat-note" id="chat-note"></div>
+</section>
+
+<script>
+(function(){
+/* ---------- персонаж: пиксельная карта 16×17 ----------
+   P — фиолетовый, H — блик, S — экран, E — глаза (лайм), M — улыбка, B — тело, L — лаймовые пиксели на груди */
+const SPRITE=[
+  "......PPP.PP....",
+  "....PPPPPPPPP...",
+  "..PPHHPPPPPPPP..",
+  ".PPHPPPPPPPPPPP.",
+  ".PPSSSSSSSSSSPP.",
+  "PPPSSSSSSSSSSPPP",
+  "PPPSSESSSSESSPPP",
+  "PPPSSESSSSESSPPP",
+  "PPPSSSSSSSSSSPPP",
+  ".PPSSSMSSMSSSPP.",
+  ".PPPSSSMMSSSPPP.",
+  "..PPPPPPPPPPPP..",
+  "....BBBBBBBB....",
+  "...BBBBLLBBBB...",
+  "....BBBBBBBB....",
+  "....BB....BB....",
+  "....BB....BB...."
+];
+const COL={P:'#6D4AFF',H:'#9C85FF',S:'#1B1640',E:'#DCF24B',M:'#DCF24B',B:'#5638E0',L:'#DCF24B'};
+function drawBot(svg){
+  let body='',eyes='';
+  SPRITE.forEach((row,y)=>[...row].forEach((c,x)=>{
+    if(c==='.') return;
+    const r=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${COL[c]}"/>`;
+    if(c==='E') eyes+=r; else body+=r;
+  }));
+  svg.innerHTML=body+`<g class="buddy-eyes">${eyes}</g>`;
+}
+drawBot(document.getElementById('buddy-svg'));
+drawBot(document.getElementById('chat-av-svg'));
+
+/* ---------- тексты ---------- */
+const TX={
+ru:{
+  title:"Помощник local host", sub:"онлайн · бета", ph:"Напишите город или вопрос…", note:"Помощник в бета-версии · отвечает по сценариям",
+  tip:"Привет! Помочь проверить, свободна ли ваша зона?", open:"Открыть помощника",
+  hi:"Привет! Я помощник local host 👋\nПомогу найти свободную зону для вашей услуги, подать заявку или отвечу на вопросы.",
+  qCity:"Проверить мой город", qApply:"Подать заявку", qHow:"Как это работает?", qPrice:"Сколько стоит?", qNp:"Что такое Nextpace?", qHuman:"Написать человеку", qMore:"Что ещё умеешь?",
+  askCity:"Напишите город, адрес или ZIP — покажу на карте, свободна ли зона.",
+  shown:"Готово — показал «{q}» на карте. Выберите услугу в поле «Услуга», чтобы увидеть, свободен ли слот.",
+  applyOpen:"Открыл форму заявки. Заполнение занимает пару минут, отвечаем за 2 рабочих дня.",
+  how:"Всё просто:\n1. Найдите свой адрес или город на карте.\n2. Выберите услугу — если рядом нет мастера с такой же, зона свободна.\n3. Оставьте заявку — в одной зоне по одной услуге работает только один мастер.",
+  price:"Есть два формата:\n• Базовое — бесплатно: профиль на карте и в каталоге, ссылка на соцсети.\n• Промо-слот — по договорённости: съёмка, тексты, реклама на зону и закрепление её за вами.\nУсловия по вашей зоне пришлём после заявки.",
+  np:"Nextpace — наш AI-продукт, «отдел маркетинга в кармане»: генерация каруселей и Reels в стиле вашего бренда по клику и дашборд рекламы Meta. Сейчас в разработке — мастера сети получат доступ первыми.",
+  npGo:"Посмотреть продукт",
+  human:"Конечно! Напишите нам:\n• Telegram — <a href=\"https://t.me/bbadmaevus\" target=\"_blank\" rel=\"noopener\">@bbadmaevus</a>\n• Почта — <a href=\"mailto:badmaevbv@nextpace.studio\">badmaevbv@nextpace.studio</a>",
+  more:"Пока я умею:\n• проверять город или адрес на карте\n• открывать заявку\n• рассказывать, как всё устроено и сколько стоит\n• соединять с командой\nСкоро научусь отвечать на любые вопросы.",
+  fallback:"Пока я не понял вопрос — я ещё учусь. Выберите вариант ниже или напишите команде напрямую.",
+  kCity:["город","адрес","зон","свобод","zip","индекс","карт"], kApply:["заявк","подать","записа","хочу"], kHow:["как","работ","правил"],
+  kPrice:["цен","стоим","сколько","бесплат","тариф","деньг","оплат"], kNp:["nextpace","ai","ии","контент","реклам","продукт"], kHuman:["человек","связ","телеграм","telegram","почт","менеджер","контакт"]
+},
+en:{
+  title:"local host assistant", sub:"online · beta", ph:"Type a city or a question…", note:"Assistant in beta · scripted answers",
+  tip:"Hi! Want me to check if your area is open?", open:"Open assistant",
+  hi:"Hi! I'm the local host assistant 👋\nI can find an open area for your service, start your application or answer questions.",
+  qCity:"Check my city", qApply:"Apply", qHow:"How does it work?", qPrice:"How much is it?", qNp:"What is Nextpace?", qHuman:"Talk to a human", qMore:"What else can you do?",
+  askCity:"Type a city, address or ZIP and I'll show on the map whether the area is open.",
+  shown:"Done — I showed “{q}” on the map. Pick your service in the “Service” field to see if the slot is open.",
+  applyOpen:"I opened the application form. It takes a couple of minutes, and we reply within 2 business days.",
+  how:"It's simple:\n1. Find your address or city on the map.\n2. Pick your service — if there's no pro with the same service nearby, the area is open.\n3. Apply — each area has only one pro per service.",
+  price:"There are two options:\n• Basic — free: profile on the map and in the catalogue, link to your socials.\n• Promo slot — let's talk: photo shoot, copy, local ads and the area reserved for you.\nWe'll send terms for your area after you apply.",
+  np:"Nextpace is our AI product, a “marketing department in your pocket”: one-click carousels and Reels in your brand's style, plus a Meta Ads dashboard. It's in development, and pros in our network get access first.",
+  npGo:"See the product",
+  human:"Sure! Reach us here:\n• Telegram — <a href=\"https://t.me/bbadmaevus\" target=\"_blank\" rel=\"noopener\">@bbadmaevus</a>\n• Email — <a href=\"mailto:badmaevbv@nextpace.studio\">badmaevbv@nextpace.studio</a>",
+  more:"Right now I can:\n• check a city or address on the map\n• open the application\n• explain how it works and what it costs\n• connect you with the team\nSoon I'll be able to answer any question.",
+  fallback:"I didn't get that yet — I'm still learning. Pick an option below or message the team directly.",
+  kCity:["city","address","area","open","zip","map","slot"], kApply:["apply","application","join","sign"], kHow:["how","work","rule"],
+  kPrice:["price","cost","much","free","plan","pay","fee"], kNp:["nextpace","ai","content","ads","product"], kHuman:["human","person","contact","telegram","email","team","talk"]
+},
+es:{
+  title:"Asistente de local host", sub:"en línea · beta", ph:"Escribe una ciudad o una pregunta…", note:"Asistente en beta · respuestas guiadas",
+  tip:"¡Hola! ¿Reviso si tu zona está libre?", open:"Abrir asistente",
+  hi:"¡Hola! Soy el asistente de local host 👋\nTe ayudo a encontrar una zona libre para tu servicio, enviar tu solicitud o responder preguntas.",
+  qCity:"Revisar mi ciudad", qApply:"Postular", qHow:"¿Cómo funciona?", qPrice:"¿Cuánto cuesta?", qNp:"¿Qué es Nextpace?", qHuman:"Hablar con una persona", qMore:"¿Qué más sabes hacer?",
+  askCity:"Escribe una ciudad, dirección o código postal y te muestro en el mapa si la zona está libre.",
+  shown:"Listo: mostré «{q}» en el mapa. Elige tu servicio en el campo «Servicio» para ver si el puesto está libre.",
+  applyOpen:"Abrí el formulario de solicitud. Toma un par de minutos y respondemos en 2 días hábiles.",
+  how:"Es sencillo:\n1. Busca tu dirección o ciudad en el mapa.\n2. Elige tu servicio: si no hay un profesional con el mismo servicio cerca, la zona está libre.\n3. Postula: en cada zona hay un solo profesional por servicio.",
+  price:"Hay dos opciones:\n• Básico — gratis: perfil en el mapa y en el catálogo, enlace a tus redes.\n• Plaza promo — a convenir: sesión de fotos, textos, publicidad en la zona y reserva para ti.\nTe enviamos las condiciones de tu zona después de postular.",
+  np:"Nextpace es nuestro producto de IA, «un departamento de marketing en tu bolsillo»: carruseles y Reels con el estilo de tu marca en un clic y un panel de anuncios de Meta. Está en desarrollo y los profesionales de la red acceden primero.",
+  npGo:"Ver el producto",
+  human:"¡Claro! Escríbenos:\n• Telegram — <a href=\"https://t.me/bbadmaevus\" target=\"_blank\" rel=\"noopener\">@bbadmaevus</a>\n• Email — <a href=\"mailto:badmaevbv@nextpace.studio\">badmaevbv@nextpace.studio</a>",
+  more:"Por ahora puedo:\n• revisar una ciudad o dirección en el mapa\n• abrir la solicitud\n• explicar cómo funciona y cuánto cuesta\n• ponerte en contacto con el equipo\nPronto podré responder cualquier pregunta.",
+  fallback:"Aún no entendí la pregunta, sigo aprendiendo. Elige una opción abajo o escribe al equipo directamente.",
+  kCity:["ciudad","dirección","direccion","zona","libre","postal","mapa"], kApply:["postul","solicitud","unir","aplicar"], kHow:["cómo","como","funciona","regla"],
+  kPrice:["precio","cuesta","cuánto","cuanto","gratis","plan","pago"], kNp:["nextpace","ia","contenido","anuncio","producto"], kHuman:["persona","humano","contacto","telegram","email","equipo","hablar"]
+}};
+const L=()=>TX[LANG]||TX.en;
+
+/* ---------- элементы ---------- */
+const wrap=$('#buddy'), btn=$('#buddy-btn'), chat=$('#chat'), log=$('#chat-log'), quick=$('#chat-quick'),
+      form=$('#chat-form'), input=$('#chat-text'), tip=$('#buddy-tip');
+let started=false, startedLang=null, mode=null;
+const store={get(k){try{return sessionStorage.getItem(k)}catch(e){return null}},set(k,v){try{sessionStorage.setItem(k,v)}catch(e){}}};
+const mobile=()=>matchMedia('(max-width:640px)').matches;
+
+function paintStatic(){
+  const l=L();
+  $('#chat-title').textContent=l.title; $('#chat-sub').textContent=l.sub; $('#chat-note').textContent=l.note;
+  $('#buddy-tip-txt').textContent=l.tip; input.placeholder=l.ph; btn.setAttribute('aria-label',l.open);
+}
+
+function add(html,who){
+  const m=document.createElement('div'); m.className='msg '+who;
+  if(who==='me') m.textContent=html; else m.innerHTML=html;
+  log.appendChild(m); log.scrollTop=log.scrollHeight; return m;
+}
+function say(html,chips){
+  const tpl=document.createElement('div'); tpl.className='msg bot typing'; tpl.innerHTML='<i></i><i></i><i></i>';
+  log.appendChild(tpl); log.scrollTop=log.scrollHeight; setQuick([]);
+  setTimeout(()=>{ tpl.remove(); add(html,'bot'); setQuick(chips||MAIN()); },
+    matchMedia('(prefers-reduced-motion:reduce)').matches?0:420+Math.min(html.length*4,600));
+}
+const MAIN=()=>['city','apply','how','price','np','human'];
+function setQuick(ids){
+  const l=L(); quick.innerHTML='';
+  ids.forEach(id=>{
+    const b=document.createElement('button'); b.type='button'; b.className='qbtn';
+    const key={city:'qCity',apply:'qApply',how:'qHow',price:'qPrice',np:'qNp',human:'qHuman',more:'qMore',npGo:'npGo'}[id];
+    b.textContent=l[key]; b.onclick=()=>{ add(l[key],'me'); act(id) }; quick.appendChild(b);
+  });
+}
+
+function act(id){
+  const l=L(); mode=null;
+  if(id==='city'){ mode='city'; say(l.askCity,['how','human']); setTimeout(()=>input.focus(),50); return }
+  if(id==='apply'){ say(l.applyOpen,['how','price','human']);
+    setTimeout(()=>{ if(mobile()) close(); openApply(current||{name:'',cityKey:null,svc:svcSel.value}) },900); return }
+  if(id==='how') return say(l.how,['city','apply','price']);
+  if(id==='price') return say(l.price,['apply','city','human']);
+  if(id==='np') return say(l.np,['npGo','apply','human']);
+  if(id==='npGo'){ if(mobile()) close(); document.getElementById('product').scrollIntoView({behavior:'smooth'}); return say(l.np.split('.')[0]+'.',['apply','human']) }
+  if(id==='human') return say(l.human,['city','apply']);
+  if(id==='more') return say(l.more);
+}
+
+function findCity(text){
+  const s=text.trim().toLowerCase();
+  return CITIES.find(c=>(c.ru||'').toLowerCase()===s||c.n.toLowerCase()===s);
+}
+function showOnMap(q){
+  qEl.value=q; remoteHits=[]; runSearch();
+  if(mobile()){ close(); window.scrollTo({top:0,behavior:'smooth'}) }
+  say(L().shown.replace('{q}',q.replace(/[<>&"]/g,'')),['apply','price','human']);
+}
+function has(text,keys){ return keys.some(k=>text.includes(k)) }
+
+form.addEventListener('submit',e=>{
+  e.preventDefault();
+  const v=input.value.trim(); if(!v) return;
+  input.value=''; add(v,'me');
+  const s=v.toLowerCase(), l=L();
+  if(mode==='city' || findCity(v) || /^\d{5}$/.test(v)){ mode=null; return showOnMap(v) }
+  if(has(s,l.kHuman)) return act('human');
+  if(has(s,l.kPrice)) return act('price');
+  if(has(s,l.kApply)) return act('apply');
+  if(has(s,l.kNp))    return act('np');
+  if(has(s,l.kCity))  return act('city');
+  if(has(s,l.kHow))   return act('how');
+  say(l.fallback,['city','apply','how','price','human']);
+});
+
+function open(){
+  hideTip(); paintStatic();
+  if(!started || startedLang!==LANG){ log.innerHTML=''; started=true; startedLang=LANG; mode=null; say(L().hi) }
+  chat.classList.add('on'); document.body.classList.add('chat-open'); btn.setAttribute('aria-expanded','true');
+  if(!mobile()) setTimeout(()=>input.focus(),200);
+}
+function close(){ chat.classList.remove('on'); document.body.classList.remove('chat-open'); btn.setAttribute('aria-expanded','false') }
+btn.onclick=()=>chat.classList.contains('on')?close():open();
+$('#chat-x').onclick=close;
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && chat.classList.contains('on')) close() });
+
+/* подсказка-приглашение: один раз за сессию */
+function hideTip(){ wrap.classList.remove('nudge'); store.set('buddyTip','1') }
+tip.onclick=e=>{ if(e.target.id==='buddy-tip-x'){ e.stopPropagation(); hideTip() } else open() };
+if(!store.get('buddyTip')) setTimeout(()=>{ if(!chat.classList.contains('on')){ paintStatic(); wrap.classList.add('nudge') } },7000);
+
+/* язык сайта поменялся — обновляем подписи */
+document.querySelectorAll('.lang-btn').forEach(b=>b.addEventListener('click',()=>{ paintStatic(); if(chat.classList.contains('on')) open() }));
+paintStatic();
+})();
 </script>
 </body>
 </html>
