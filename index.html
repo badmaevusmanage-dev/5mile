@@ -4,7 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#FCFBF9">
-<title>Карта сети · Найдите свой город · local host</title>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<title>Nextpace · local host — карта сети мастеров</title>
 <meta name="description" content="Интерактивная карта сети мастеров. Найдите город и услугу — узнайте, свободен ли слот, и подайте заявку.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -84,6 +86,13 @@ button{font:inherit;color:inherit}
 .brand-mark{font-family:var(--serif);font-weight:400;font-size:22px;letter-spacing:.02em}
 .brand-dot{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 1px rgba(20,17,14,.25)}
 .brand-sub{color:var(--slate);font-size:11px;letter-spacing:.06em}
+.np-icon{width:30px;height:30px;border-radius:8px;flex:none;display:block}
+.brand-names{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.np-word{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.03em;color:var(--ink);line-height:1}
+.brand-sep{width:1px;height:20px;background:var(--rule-2)}
+.brand-lh{display:inline-flex;align-items:center;gap:6px}
+.topbar .brand-lh .brand-mark{font-family:var(--mono);font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.brand-lh .brand-dot{width:6px;height:6px}
 .topnav{display:flex;gap:8px}
 .topnav a{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);
   text-decoration:none;padding:8px 13px;border-radius:999px;border:1px solid transparent}
@@ -95,11 +104,16 @@ button{font:inherit;color:inherit}
 .lang-btn:hover{color:var(--ink)}
 .lang-btn.on{background:var(--ink);color:var(--paper)}
 #cta-top{white-space:nowrap}
-@media (max-width:760px){.brand-sub{display:none}.brand-mark{white-space:nowrap}}
+@media (max-width:760px){.brand-sub{display:none}}
 @media (max-width:560px){.langs{padding:1px}.lang-btn{padding:5px 8px;font-size:9px}
-  .topbar{gap:10px;padding:0 14px}.brand-mark{font-size:15px!important;white-space:nowrap}.brand{gap:7px}
+  .topbar{gap:10px;padding:0 14px}.brand{gap:8px}
+  .np-icon{width:28px;height:28px}
+  .brand-names{flex-direction:column;align-items:flex-start;gap:3px}
+  .brand-sep{display:none}
+  .np-word{font-size:17px}
+  .topbar .brand-lh .brand-mark{font-size:9px;letter-spacing:.12em}
   #cta-top{padding:8px 12px;font-size:12px;white-space:nowrap}}
-@media (max-width:360px){.brand-dot{display:none}#cta-top{padding:7px 10px;font-size:11px}}
+@media (max-width:360px){.np-icon{display:none}#cta-top{padding:7px 10px;font-size:11px}}
 
 /* ==========================================================
    СЦЕНА
@@ -537,7 +551,12 @@ button{font:inherit;color:inherit}
 
 <header class="topbar">
   <div class="brand">
-    <span class="brand-mark" data-i18n="brandName"></span><i class="brand-dot"></i>
+    <img class="np-icon" src="assets/nextpace-icon.png" alt="" width="30" height="30">
+    <span class="brand-names">
+      <span class="np-word">Nextpace</span>
+      <span class="brand-sep" aria-hidden="true"></span>
+      <span class="brand-lh"><span class="brand-mark" data-i18n="brandName"></span><i class="brand-dot"></i></span>
+    </span>
     <span class="brand-sub" data-i18n="brandSub"></span>
   </div>
   <nav class="topnav">
@@ -1102,7 +1121,7 @@ ru:{
  tGeoDown:"Геокодер недоступен — выберите город на карте", tDetecting:"Определяем место…", tSent:"Заявка отправлена · ", tCopied:"Ссылка скопирована",
  tWrite:"Здесь подключается чат или переход в профиль мастера", tDbDown:"База недоступна — показаны демо-данные", tSendFail:"Не удалось отправить — попробуйте ещё раз",
  mapPoint:"Точка на карте", milesShort:"миль", mln:"млн",
- pageTitle:"Карта сети · Найдите свой город · local host", pageDesc:"Интерактивная карта сети мастеров. Найдите город и услугу — узнайте, свободен ли слот, и подайте заявку.",
+ pageTitle:"Nextpace · local host — карта сети мастеров", pageDesc:"Интерактивная карта сети мастеров. Найдите город и услугу — узнайте, свободен ли слот, и подайте заявку.",
  ariaSuggest:"Подсказки", ariaZoomIn:"Приблизить", ariaZoomOut:"Отдалить", ariaProfile:"Профиль мастера", ariaApply:"Заявка"
 },
 en:{
@@ -1168,7 +1187,7 @@ en:{
  tGeoDown:"Search is unavailable — pick a city on the map", tDetecting:"Locating…", tSent:"Application sent · ", tCopied:"Link copied",
  tWrite:"This is where chat or the pro's profile would open", tDbDown:"Database unavailable — showing demo data", tSendFail:"Couldn't send — please try again",
  mapPoint:"Point on the map", milesShort:"miles", mln:"M",
- pageTitle:"Network map · Find your city · local host", pageDesc:"Interactive map of our network of pros. Find your city and service, check whether the slot is open and apply.",
+ pageTitle:"Nextpace · local host — network map", pageDesc:"Interactive map of our network of pros. Find your city and service, check whether the slot is open and apply.",
  ariaSuggest:"Suggestions", ariaZoomIn:"Zoom in", ariaZoomOut:"Zoom out", ariaProfile:"Pro profile", ariaApply:"Application"
 },
 es:{
@@ -1234,7 +1253,7 @@ es:{
  tGeoDown:"Búsqueda no disponible — elige una ciudad en el mapa", tDetecting:"Localizando…", tSent:"Solicitud enviada · ", tCopied:"Enlace copiado",
  tWrite:"Aquí se abriría el chat o el perfil del profesional", tDbDown:"Base de datos no disponible — datos de demostración", tSendFail:"No se pudo enviar — inténtalo de nuevo",
  mapPoint:"Punto en el mapa", milesShort:"millas", mln:"M",
- pageTitle:"Mapa de la red · Encuentra tu ciudad · local host", pageDesc:"Mapa interactivo de la red de profesionales. Encuentra tu ciudad y servicio, comprueba si el puesto está libre y postula.",
+ pageTitle:"Nextpace · local host — mapa de la red", pageDesc:"Mapa interactivo de la red de profesionales. Encuentra tu ciudad y servicio, comprueba si el puesto está libre y postula.",
  ariaSuggest:"Sugerencias", ariaZoomIn:"Acercar", ariaZoomOut:"Alejar", ariaProfile:"Perfil del profesional", ariaApply:"Solicitud"
 }
 };
