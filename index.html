@@ -2292,7 +2292,7 @@ drawBot(document.getElementById('chat-av-svg'));
 /* ---------- тексты ---------- */
 const TX={
 ru:{
-  title:"Помощник local host", sub:"онлайн · бета", ph:"Напишите город или вопрос…", note:"Помощник в бета-версии · отвечает по сценариям",
+  title:"Помощник local host", sub:"онлайн · бета", ph:"Напишите город или вопрос…", note:"AI-помощник · бета · может ошибаться",
   tip:"Привет! Помочь проверить, свободна ли ваша зона?", open:"Открыть помощника",
   hi:"Привет! Я помощник local host 👋\nПомогу найти свободную зону для вашей услуги, подать заявку или отвечу на вопросы.",
   qCity:"Проверить мой город", qApply:"Подать заявку", qHow:"Как это работает?", qPrice:"Сколько стоит?", qNp:"Что такое Nextpace?", qHuman:"Написать человеку", qMore:"Что ещё умеешь?",
@@ -2310,7 +2310,7 @@ ru:{
   kPrice:["цен","стоим","сколько","бесплат","тариф","деньг","оплат"], kNp:["nextpace","ai","ии","контент","реклам","продукт"], kHuman:["человек","связ","телеграм","telegram","почт","менеджер","контакт"]
 },
 en:{
-  title:"local host assistant", sub:"online · beta", ph:"Type a city or a question…", note:"Assistant in beta · scripted answers",
+  title:"local host assistant", sub:"online · beta", ph:"Type a city or a question…", note:"AI assistant · beta · can make mistakes",
   tip:"Hi! Want me to check if your area is open?", open:"Open assistant",
   hi:"Hi! I'm the local host assistant 👋\nI can find an open area for your service, start your application or answer questions.",
   qCity:"Check my city", qApply:"Apply", qHow:"How does it work?", qPrice:"How much is it?", qNp:"What is Nextpace?", qHuman:"Talk to a human", qMore:"What else can you do?",
@@ -2328,7 +2328,7 @@ en:{
   kPrice:["price","cost","much","free","plan","pay","fee"], kNp:["nextpace","ai","content","ads","product"], kHuman:["human","person","contact","telegram","email","team","talk"]
 },
 es:{
-  title:"Asistente de local host", sub:"en línea · beta", ph:"Escribe una ciudad o una pregunta…", note:"Asistente en beta · respuestas guiadas",
+  title:"Asistente de local host", sub:"en línea · beta", ph:"Escribe una ciudad o una pregunta…", note:"Asistente con IA · beta · puede equivocarse",
   tip:"¡Hola! ¿Reviso si tu zona está libre?", open:"Abrir asistente",
   hi:"¡Hola! Soy el asistente de local host 👋\nTe ayudo a encontrar una zona libre para tu servicio, enviar tu solicitud o responder preguntas.",
   qCity:"Revisar mi ciudad", qApply:"Postular", qHow:"¿Cómo funciona?", qPrice:"¿Cuánto cuesta?", qNp:"¿Qué es Nextpace?", qHuman:"Hablar con una persona", qMore:"¿Qué más sabes hacer?",
@@ -2350,7 +2350,7 @@ const L=()=>TX[LANG]||TX.en;
 /* ---------- элементы ---------- */
 const wrap=$('#buddy'), btn=$('#buddy-btn'), chat=$('#chat'), log=$('#chat-log'), quick=$('#chat-quick'),
       form=$('#chat-form'), input=$('#chat-text'), tip=$('#buddy-tip');
-let started=false, startedLang=null, mode=null;
+let started=false, startedLang=null, mode=null, hist=[], busy=false;
 const store={get(k){try{return sessionStorage.getItem(k)}catch(e){return null}},set(k,v){try{sessionStorage.setItem(k,v)}catch(e){}}};
 const mobile=()=>matchMedia('(max-width:640px)').matches;
 
@@ -2362,8 +2362,10 @@ function paintStatic(){
 
 function add(html,who){
   const m=document.createElement('div'); m.className='msg '+who;
-  if(who==='me') m.textContent=html; else m.innerHTML=html;
-  log.appendChild(m); log.scrollTop=log.scrollHeight; return m;
+  if(who==='me') m.textContent=html; else if(who==='ai') { m.className='msg bot'; m.textContent=html } else m.innerHTML=html;
+  log.appendChild(m); log.scrollTop=log.scrollHeight;
+  hist.push({role: who==='me'?'user':'assistant', content: m.innerText.trim()});
+  return m;
 }
 function say(html,chips){
   const tpl=document.createElement('div'); tpl.className='msg bot typing'; tpl.innerHTML='<i></i><i></i><i></i>';
@@ -2405,12 +2407,9 @@ function showOnMap(q){
 }
 function has(text,keys){ return keys.some(k=>text.includes(k)) }
 
-form.addEventListener('submit',e=>{
-  e.preventDefault();
-  const v=input.value.trim(); if(!v) return;
-  input.value=''; add(v,'me');
+/* свободный вопрос → AI (/api/chat); если сервер недоступен — прежние сценарии */
+function scripted(v){
   const s=v.toLowerCase(), l=L();
-  if(mode==='city' || findCity(v) || /^\d{5}$/.test(v)){ mode=null; return showOnMap(v) }
   if(has(s,l.kHuman)) return act('human');
   if(has(s,l.kPrice)) return act('price');
   if(has(s,l.kApply)) return act('apply');
@@ -2418,11 +2417,48 @@ form.addEventListener('submit',e=>{
   if(has(s,l.kCity))  return act('city');
   if(has(s,l.kHow))   return act('how');
   say(l.fallback,['city','apply','how','price','human']);
+}
+function runActions(list){
+  (list||[]).forEach(a=>{
+    if(a.name==='show_on_map' && a.input && a.input.query){
+      qEl.value=String(a.input.query).slice(0,120); remoteHits=[]; runSearch();
+      if(mobile()){ setTimeout(()=>{ close(); window.scrollTo({top:0,behavior:'smooth'}) },1600) }
+    }
+    if(a.name==='open_application') setTimeout(()=>{ if(mobile()) close(); openApply(current||{name:'',cityKey:null,svc:svcSel.value}) },1200);
+    if(a.name==='show_product') setTimeout(()=>{ if(mobile()) close(); document.getElementById('product').scrollIntoView({behavior:'smooth'}) },1200);
+  });
+}
+async function askAI(v){
+  busy=true; setQuick([]);
+  const tpl=document.createElement('div'); tpl.className='msg bot typing'; tpl.innerHTML='<i></i><i></i><i></i>';
+  log.appendChild(tpl); log.scrollTop=log.scrollHeight;
+  try{
+    const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),30000);
+    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl.signal,
+      body:JSON.stringify({lang:LANG,messages:hist.slice(-12)})});
+    clearTimeout(to);
+    const data=r.ok ? await r.json() : null;
+    tpl.remove();
+    if(!data || !data.reply){ busy=false; return scripted(v) }
+    add(data.reply,'ai'); setQuick(['city','apply','human']);
+    runActions(data.actions);
+  }catch(e){
+    tpl.remove(); scripted(v);
+  }
+  busy=false;
+}
+
+form.addEventListener('submit',e=>{
+  e.preventDefault();
+  const v=input.value.trim(); if(!v || busy) return;
+  input.value=''; add(v,'me');
+  if(mode==='city' || findCity(v) || /^\d{5}$/.test(v)){ mode=null; return showOnMap(v) }
+  askAI(v);
 });
 
 function open(){
   hideTip(); paintStatic();
-  if(!started || startedLang!==LANG){ log.innerHTML=''; started=true; startedLang=LANG; mode=null; say(L().hi) }
+  if(!started || startedLang!==LANG){ log.innerHTML=''; hist=[]; started=true; startedLang=LANG; mode=null; say(L().hi) }
   chat.classList.add('on'); document.body.classList.add('chat-open'); btn.setAttribute('aria-expanded','true');
   if(!mobile()) setTimeout(()=>input.focus(),200);
 }
