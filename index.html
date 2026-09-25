@@ -2178,6 +2178,12 @@ if(DB){
 .chat-ib:disabled{opacity:.45;cursor:default}
 .chat-note{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate);text-align:center;padding:0 0 8px;background:var(--card)}
 
+/* десктоп: карта во всю высоту экрана — освобождаем правый нижний угол под персонажа */
+@media (min-width:901px){
+  .zoomer{bottom:118px}
+  .side{max-height:calc(100% - 124px)}
+  .leaflet-bottom.leaflet-right{right:104px}
+}
 @media (max-width:640px){
   .buddy{right:12px;bottom:12px}
   .buddy-btn{width:62px;height:62px}
