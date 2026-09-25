@@ -1833,7 +1833,7 @@ const MAPBOX_TOKEN = "pk.eyJ1IjoiYmFkbWFldmIiLCJhIjoiY210NG0weWlqMTU1czJ5cHdzcGQ
 
 const GEO = {
   countries:'us',    // коды стран через запятую; пустая строка — весь мир
-  lang:'ru',
+  get lang(){ return LANG },   // язык подсказок = язык сайта
   minChars:3,        // с какой длины запроса идём в геокодер
   debounce:280,      // пауза после набора, мс
   limit:5            // сколько адресов показывать
