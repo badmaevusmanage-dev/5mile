@@ -264,6 +264,11 @@ button{font:inherit;color:inherit}
   box-shadow:0 0 0 2px var(--paper)}
 .avatars-off .mstr{display:none}
 
+.map-hint{position:absolute;inset:0;z-index:440;display:grid;place-items:center;pointer-events:none;
+  background:rgba(20,17,14,.38);opacity:0;transition:opacity .25s}
+.map-hint.on{opacity:1}
+.map-hint span{background:var(--ink);color:var(--paper);padding:11px 18px;border-radius:999px;font-size:14px;font-weight:500;
+  max-width:calc(100% - 40px);text-align:center;box-shadow:var(--shadow)}
 .toast{position:absolute;left:50%;bottom:22px;transform:translate(-50%,14px);z-index:430;background:var(--ink);color:var(--paper);
   padding:10px 18px;border-radius:999px;font-size:12.5px;opacity:0;pointer-events:none;transition:.25s}
 .toast.on{opacity:1;transform:translate(-50%,0)}
@@ -591,6 +596,7 @@ button{font:inherit;color:inherit}
   <div class="map-wrap">
     <div id="map"></div>
 
+    <div class="map-hint" id="map-hint" aria-hidden="true"><span id="map-hint-txt"></span></div>
     <div class="reticle" id="reticle" aria-hidden="true">
       <span class="h"></span><span class="v"></span><span class="b"></span>
     </div>
@@ -1060,6 +1066,7 @@ ru:{
  pA1n:"СЕЙЧАС", pA1h:"Бьюти-мастера и салоны", pA1p:"Брови, ресницы, ногти, волосы, косметология. Мастера сети local host получают доступ первыми.",
  pA2n:"ДАЛЕЕ", pA2h:"Весь локальный бизнес", pA2p:"Фитнес, клиники, кафе, услуги — все, кому нужен маркетинг без отдела маркетинга.",
  pCta:"Получить ранний доступ", pCtaNote:"Nextpace · в разработке",
+ hintWheel:"Удерживайте {key}, чтобы приблизить карту", hintTouch:"Двигайте карту двумя пальцами",
  footTag:"local host · сеть продвигаемых мастеров · 2026", footPolicy:"Политика конфиденциальности",
  sugCities:"Города сети", sugAddr:"Адреса", sugBusy:"Ищем адреса…", sugSoon:"Скоро", sugFree:"Свободно", sugMast:"маст.", sugExact:"Точно",
  idleMasters:"Мастера в сети", idleFree:"Города без мастеров", idleAllFree:"Все слоты свободны",
@@ -1125,6 +1132,7 @@ en:{
  pA1n:"NOW", pA1h:"Beauty pros and salons", pA1p:"Brows, lashes, nails, hair, skincare. Pros in the local host network get access first.",
  pA2n:"NEXT", pA2h:"Every local business", pA2p:"Fitness, clinics, cafes, home services: anyone who needs marketing without a marketing team.",
  pCta:"Get early access", pCtaNote:"Nextpace · in development",
+ hintWheel:"Hold {key} to zoom the map", hintTouch:"Use two fingers to move the map",
  footTag:"local host · network of featured pros · 2026", footPolicy:"Privacy policy",
  sugCities:"Network cities", sugAddr:"Addresses", sugBusy:"Searching addresses…", sugSoon:"Soon", sugFree:"Open", sugMast:"pros", sugExact:"Exact",
  idleMasters:"Pros in the network", idleFree:"Cities without pros", idleAllFree:"All slots open",
@@ -1190,6 +1198,7 @@ es:{
  pA1n:"AHORA", pA1h:"Profesionales y salones de belleza", pA1p:"Cejas, pestañas, uñas, cabello, cosmetología. Los profesionales de la red local host acceden primero.",
  pA2n:"DESPUÉS", pA2h:"Todo negocio local", pA2p:"Fitness, clínicas, cafés, servicios: todos los que necesitan marketing sin un equipo de marketing.",
  pCta:"Obtener acceso anticipado", pCtaNote:"Nextpace · en desarrollo",
+ hintWheel:"Mantén {key} para hacer zoom en el mapa", hintTouch:"Usa dos dedos para mover el mapa",
  footTag:"local host · red de profesionales destacados · 2026", footPolicy:"Política de privacidad",
  sugCities:"Ciudades de la red", sugAddr:"Direcciones", sugBusy:"Buscando direcciones…", sugSoon:"Pronto", sugFree:"Libre", sugMast:"prof.", sugExact:"Exacta",
  idleMasters:"Profesionales en la red", idleFree:"Ciudades sin profesionales", idleAllFree:"Todas las plazas libres",
@@ -1355,11 +1364,36 @@ function verdict(place){
 /* =======================================================================
    3. КАРТА
    ======================================================================= */
-const map = L.map('map',{zoomControl:false,minZoom:2,maxZoom:14,worldCopyJump:true,zoomSnap:.5}).setView(HOME_VIEW.center,HOME_VIEW.zoom);
+/* жесты: на телефоне карту двигают двумя пальцами, на компьютере зум колёсиком — только с Ctrl/⌘,
+   иначе карта перехватывает прокрутку страницы */
+const TOUCH_UI = matchMedia('(pointer:coarse)').matches;
+const map = L.map('map',{dragging:!TOUCH_UI,zoomControl:false,minZoom:2,maxZoom:14,worldCopyJump:true,zoomSnap:.5}).setView(HOME_VIEW.center,HOME_VIEW.zoom);
 /* Ключ CARTO: бесплатно на carto.com/basemaps/apikey (до 5 млн тайлов в месяц).
    Без ключа карта работает, но на ней надпись «API KEY REQUIRED». */
 const CARTO_KEY = "cb1_3pts_1_22adef5e7f57e8d41686fc81";   // ← сюда ключ CARTO
 const CARTO_Q = CARTO_KEY ? '?key='+encodeURIComponent(CARTO_KEY) : '';
+(function gestureHints(){
+  const wrap=document.querySelector('.map-wrap'), hint=document.getElementById('map-hint'), txt=document.getElementById('map-hint-txt');
+  const KEY=/Mac|iPhone|iPad/.test(navigator.platform)?'⌘':'Ctrl';
+  let timer=null;
+  function show(msg){ txt.textContent=msg; hint.classList.add('on'); clearTimeout(timer); timer=setTimeout(()=>hint.classList.remove('on'),1300) }
+  /* колёсико без Ctrl/⌘ не доходит до карты — страница прокручивается */
+  wrap.addEventListener('wheel',e=>{
+    if(e.ctrlKey||e.metaKey){ hint.classList.remove('on'); return }
+    if(!e.target.closest('#map')) return;
+    e.stopPropagation(); show(t('hintWheel',{key:KEY}));
+  },{capture:true,passive:true});
+  /* один палец двигается по карте — подсказываем про два пальца */
+  if(TOUCH_UI){
+    let sx=0, sy=0, one=false;
+    wrap.addEventListener('touchstart',e=>{ one=e.touches.length===1; if(one){sx=e.touches[0].clientX; sy=e.touches[0].clientY} else hint.classList.remove('on') },{passive:true});
+    wrap.addEventListener('touchmove',e=>{
+      if(!one||e.touches.length!==1||!e.target.closest('#map')) return;
+      const d=Math.hypot(e.touches[0].clientX-sx,e.touches[0].clientY-sy);
+      if(d>24){ one=false; show(t('hintTouch')) }
+    },{passive:true});
+  }
+})();
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_nolabels/{z}/{x}/{y}{r}.png'+CARTO_Q,
   {subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap · © CARTO'}).addTo(map);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_only_labels/{z}/{x}/{y}{r}.png'+CARTO_Q,
