@@ -400,6 +400,49 @@ button{font:inherit;color:inherit}
 .step-n{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--slate);display:block;margin-bottom:16px}
 .step h3{font-family:var(--serif);font-weight:400;font-size:21px;margin:0 0 8px}
 .step p{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.6}
+/* AI-продукт Nextpace — свой фиолетовый акцент внутри общей системы */
+.prod{--np:#6D4AFF;--np-2:#A855F7;--np-wash:#F1EDFF;padding:72px 22px 80px;border-top:1px solid var(--rule);background:var(--vellum)}
+.prod-in{max-width:1080px;margin:0 auto}
+.prod .eyebrow b{color:var(--np);font-weight:500}
+.prod h2{font-family:var(--display);font-weight:600;font-size:40px;line-height:1.04;letter-spacing:-.035em;margin:12px 0 14px;max-width:16ch}
+.prod h2 em{font-style:italic;color:var(--np)}
+.prod-lede{max-width:56ch;color:var(--ink-2);font-size:15.5px;line-height:1.6;margin:0 0 40px}
+.mods{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.mod{background:var(--card);border:1px solid var(--rule);border-radius:var(--r-card);padding:24px;display:flex;flex-direction:column}
+.mod h3{font-family:var(--display);font-weight:600;font-size:21px;letter-spacing:-.025em;margin:10px 0 8px}
+.mod p{margin:0 0 20px;font-size:13.5px;line-height:1.6;color:var(--ink-2)}
+.mod-n{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--np)}
+.mock{margin-top:auto;border:1px solid var(--rule);border-radius:14px;background:var(--paper);padding:14px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{aspect-ratio:4/5;border-radius:10px;padding:10px;display:flex;flex-direction:column;justify-content:flex-end;gap:5px;
+  background:linear-gradient(150deg,var(--np),var(--np-2))}
+.tile:nth-child(2){background:linear-gradient(150deg,#2A2622,#4A3F6B)}
+.tile:nth-child(3){background:linear-gradient(150deg,var(--np-wash),#DCD2FF)}
+.tile i{display:block;height:6px;border-radius:3px;background:rgba(255,255,255,.85)}
+.tile i:last-child{width:60%}
+.tile:nth-child(3) i{background:rgba(20,17,14,.55)}
+.mock-bar{display:flex;align-items:center;gap:6px;margin-top:12px;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:5px 9px;border-radius:999px;border:1px solid var(--rule-2);color:var(--ink-2)}
+.chip.on{background:var(--np-wash);border-color:transparent;color:var(--np)}
+.gen{margin-left:auto;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:6px 11px;border-radius:999px;background:var(--np);color:#fff}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kpi{border:1px solid var(--rule);border-radius:10px;padding:9px 10px;background:var(--card)}
+.kpi span{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--slate)}
+.kpi b{display:block;font-family:var(--display);font-weight:600;font-size:18px;letter-spacing:-.03em;margin-top:3px}
+.kpi em{font-style:normal;font-family:var(--mono);font-size:9.5px;color:var(--open)}
+.spark{display:block;width:100%;height:64px;margin-top:10px}
+.mock-cap{display:block;margin-top:8px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--slate)}
+.prod .steps{margin:0 0 16px}
+.prod .step-n{color:var(--np)}
+.aud{display:grid;grid-template-columns:1fr 1fr auto;gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:18px;overflow:hidden}
+.aud>div{background:var(--card);padding:22px 24px}
+.aud h4{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-.02em;margin:8px 0 6px}
+.aud p{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.55}
+.aud .aud-cta{display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:240px}
+.btn-np{background:var(--np);color:#fff;border:0}
+.btn-np:hover{background:#5A37F0}
+.aud-note{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate)}
+
 .foot{border-top:1px solid var(--rule);padding:26px 22px;display:flex;gap:18px;flex-wrap:wrap;align-items:center}
 .foot .eyebrow{margin-right:auto}
 .foot a{font-size:12.5px;color:var(--slate);text-decoration:none}
@@ -427,6 +470,11 @@ button{font:inherit;color:inherit}
   .strip div:nth-child(1),.strip div:nth-child(2){border-bottom:1px solid var(--rule)}
   .steps{grid-template-columns:1fr}
   .how{padding:48px 20px}.how h2{font-size:30px}
+  .prod{padding:52px 16px 56px}.prod h2{font-size:31px}
+  .mods{grid-template-columns:1fr}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .aud{grid-template-columns:1fr}
+  .aud .aud-cta{min-width:0}
   .overlay{padding:0}
   .pcard,.acard{width:100%;max-height:100svh;height:100svh;border-radius:0}
   .pcard-hero{height:210px}
@@ -478,6 +526,7 @@ button{font:inherit;color:inherit}
   <nav class="topnav">
     <a href="#" class="on" id="nav-map" data-i18n="navMap"></a>
     <a href="#how" data-i18n="navHow"></a>
+    <a href="#product" data-i18n="navProd"></a>
     <a href="#" id="nav-open" data-i18n="navFree"></a>
   </nav>
   <div class="langs">
@@ -573,9 +622,72 @@ button{font:inherit;color:inherit}
   </div>
 </section>
 
+<section class="prod" id="product">
+  <div class="prod-in">
+    <span class="eyebrow" data-i18n-html="pEyebrow"></span>
+    <h2 data-i18n-html="pTitle"></h2>
+    <p class="prod-lede" data-i18n="pLede"></p>
+
+    <div class="mods">
+      <article class="mod">
+        <span class="mod-n" data-i18n="pM1n"></span>
+        <h3 data-i18n="pM1h"></h3>
+        <p data-i18n="pM1p"></p>
+        <div class="mock" aria-hidden="true">
+          <div class="tiles">
+            <div class="tile"><i></i><i></i></div>
+            <div class="tile"><i></i><i></i></div>
+            <div class="tile"><i></i><i></i></div>
+          </div>
+          <div class="mock-bar">
+            <span class="chip on" data-i18n="pChip1"></span>
+            <span class="chip">Reels</span>
+            <span class="chip" data-i18n="pChip3"></span>
+            <span class="gen" data-i18n="pGen"></span>
+          </div>
+        </div>
+      </article>
+      <article class="mod">
+        <span class="mod-n" data-i18n="pM2n"></span>
+        <h3 data-i18n="pM2h"></h3>
+        <p data-i18n="pM2p"></p>
+        <div class="mock" aria-hidden="true">
+          <div class="kpis">
+            <div class="kpi"><span data-i18n="pK1"></span><b class="num">$420</b></div>
+            <div class="kpi"><span>CTR</span><b class="num">2.8%</b><em class="num">+0.6</em></div>
+            <div class="kpi"><span data-i18n="pK3"></span><b class="num">37</b><em class="num">+12</em></div>
+            <div class="kpi"><span>ROAS</span><b class="num">3.4×</b></div>
+          </div>
+          <svg class="spark" viewBox="0 0 300 64" preserveAspectRatio="none">
+            <defs><linearGradient id="np-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6D4AFF" stop-opacity=".22"/><stop offset="1" stop-color="#6D4AFF" stop-opacity="0"/></linearGradient></defs>
+            <path d="M0 50 L25 46 L50 48 L75 40 L100 42 L125 34 L150 36 L175 27 L200 30 L225 20 L250 22 L275 13 L300 9 L300 64 L0 64Z" fill="url(#np-fill)"/>
+            <polyline points="0,50 25,46 50,48 75,40 100,42 125,34 150,36 175,27 200,30 225,20 250,22 275,13 300,9" fill="none" stroke="#6D4AFF" stroke-width="2" vector-effect="non-scaling-stroke"/>
+          </svg>
+          <span class="mock-cap" data-i18n="pDemo"></span>
+        </div>
+      </article>
+    </div>
+
+    <div class="steps">
+      <div class="step"><span class="step-n" data-i18n="pS1n"></span><h3 data-i18n="pS1h"></h3><p data-i18n="pS1p"></p></div>
+      <div class="step"><span class="step-n" data-i18n="pS2n"></span><h3 data-i18n="pS2h"></h3><p data-i18n="pS2p"></p></div>
+      <div class="step"><span class="step-n" data-i18n="pS3n"></span><h3 data-i18n="pS3h"></h3><p data-i18n="pS3p"></p></div>
+    </div>
+
+    <div class="aud">
+      <div><span class="eyebrow" data-i18n="pA1n"></span><h4 data-i18n="pA1h"></h4><p data-i18n="pA1p"></p></div>
+      <div><span class="eyebrow" data-i18n="pA2n"></span><h4 data-i18n="pA2h"></h4><p data-i18n="pA2p"></p></div>
+      <div class="aud-cta">
+        <button class="btn btn-np btn-block" id="cta-prod" data-i18n="pCta"></button>
+        <span class="aud-note" data-i18n="pCtaNote"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <footer class="foot" id="foot">
   <span class="eyebrow" data-i18n="footTag"></span>
-  <a href="#">hello@example.com</a><a href="#">Telegram</a><a href="#" data-i18n="footPolicy"></a>
+  <a href="mailto:badmaevbv@nextpace.studio">badmaevbv@nextpace.studio</a><a href="https://t.me/bbadmaevus" target="_blank" rel="noopener">Telegram</a><a href="privacy.html" id="foot-policy" data-i18n="footPolicy"></a>
 </footer>
 
 <div class="overlay" id="ov-profile"><div class="scrim" data-close></div><div class="pcard" id="pcard" role="dialog" aria-modal="true" data-i18n-aria="ariaProfile"></div></div>
@@ -923,6 +1035,19 @@ ru:{
  s1n:"01 — ПОИСК", s1h:"Найдите свой адрес", s1p:"Введите адрес, город или индекс, либо тапните точку на карте. Аватары — мастера, которых мы уже продвигаем.",
  s2n:"02 — ПРОВЕРКА", s2h:"Проверьте зону по услуге", s2p:"Выберите свою услугу: если рядом нет мастера с такой же услугой, зона свободна и она может стать вашей.",
  s3n:"03 — ЗАЯВКА", s3h:"Заполните заявку", s3p:"Форма открывается прямо поверх карты. Отвечаем за два рабочих дня и присылаем условия по вашей зоне.",
+ navProd:"AI-продукт",
+ pEyebrow:"AI-продукт · <b>Nextpace</b>", pTitle:"Отдел маркетинга <em>в кармане</em>",
+ pLede:"Технология, на которой работает local host. Загрузите фото — получите готовый контент в стиле своего бренда. И смотрите, как идёт реклама, в одном приложении.",
+ pM1n:"01 — КОНТЕНТ", pM1h:"Генерация контента по клику", pM1p:"Стиль бренда загружается один раз. Выберите формат и цель, загрузите фото или видео — получите карусель, Reels или пост с подписью и хэштегами.",
+ pChip1:"Карусель", pChip3:"Сторис", pGen:"Создать",
+ pM2n:"02 — РЕКЛАМА", pM2h:"Дашборд рекламы Meta", pM2p:"Подключите рекламный кабинет — и все показатели на одном экране: расход, охват, CTR, лиды, ROAS. Видно, какие креативы работают.",
+ pK1:"Расход", pK3:"Лиды", pDemo:"Демо-данные · 30 дней",
+ pS1n:"01 — СТИЛЬ", pS1h:"Загрузите бренд один раз", pS1p:"Логотип, цвета, шрифты и примеры работ. Всё, что создаётся дальше, выглядит как ваш бренд.",
+ pS2n:"02 — ФОРМАТ", pS2h:"Выберите, что нужно", pS2p:"Карусель, Reels, сторис или пост и цель: акция, до/после, новая услуга, отзыв.",
+ pS3n:"03 — ГОТОВО", pS3h:"Скачайте и публикуйте", pS3p:"Готовый контент с подписью за минуты. А результаты рекламы видны в дашборде.",
+ pA1n:"СЕЙЧАС", pA1h:"Бьюти-мастера и салоны", pA1p:"Брови, ресницы, ногти, волосы, косметология. Мастера сети local host получают доступ первыми.",
+ pA2n:"ДАЛЕЕ", pA2h:"Весь локальный бизнес", pA2p:"Фитнес, клиники, кафе, услуги — все, кому нужен маркетинг без отдела маркетинга.",
+ pCta:"Получить ранний доступ", pCtaNote:"Nextpace · в разработке",
  footTag:"local host · сеть продвигаемых мастеров · 2026", footPolicy:"Политика конфиденциальности",
  sugCities:"Города сети", sugAddr:"Адреса", sugBusy:"Ищем адреса…", sugSoon:"Скоро", sugFree:"Свободно", sugMast:"маст.", sugExact:"Точно",
  idleMasters:"Мастера в сети", idleFree:"Города без мастеров", idleAllFree:"Все слоты свободны",
@@ -975,6 +1100,19 @@ en:{
  s1n:"01 — SEARCH", s1h:"Find your address", s1p:"Type an address, city or ZIP, or tap a point on the map. The avatars are pros we already promote.",
  s2n:"02 — CHECK", s2h:"Check the area for your service", s2p:"Pick your service: if there's no pro nearby doing the same thing, the area is open and it can be yours.",
  s3n:"03 — APPLY", s3h:"Fill in the form", s3p:"The form opens right over the map. We reply within two business days with terms for your area.",
+ navProd:"AI product",
+ pEyebrow:"AI product · <b>Nextpace</b>", pTitle:"A marketing department <em>in your pocket</em>",
+ pLede:"The technology behind local host. Upload a photo, get ready-to-post content in your brand's style, and see how your ads are doing, all in one app.",
+ pM1n:"01 — CONTENT", pM1h:"One-click content generation", pM1p:"Upload your brand style once. Pick a format and a goal, add photos or a video, and get a carousel, Reel or post with caption and hashtags.",
+ pChip1:"Carousel", pChip3:"Story", pGen:"Generate",
+ pM2n:"02 — ADS", pM2h:"Meta Ads dashboard", pM2p:"Connect your ad account and see every metric on one screen: spend, reach, CTR, leads, ROAS. Know which creatives work.",
+ pK1:"Spend", pK3:"Leads", pDemo:"Demo data · 30 days",
+ pS1n:"01 — STYLE", pS1h:"Set up your brand once", pS1p:"Logo, colors, fonts and examples of your work. Everything you create after looks like your brand.",
+ pS2n:"02 — FORMAT", pS2h:"Choose what you need", pS2p:"Carousel, Reel, Story or post, plus a goal: promo, before/after, new service, review.",
+ pS3n:"03 — DONE", pS3h:"Download and post", pS3p:"Ready content with a caption in minutes. Ad results show up in the dashboard.",
+ pA1n:"NOW", pA1h:"Beauty pros and salons", pA1p:"Brows, lashes, nails, hair, skincare. Pros in the local host network get access first.",
+ pA2n:"NEXT", pA2h:"Every local business", pA2p:"Fitness, clinics, cafes, home services: anyone who needs marketing without a marketing team.",
+ pCta:"Get early access", pCtaNote:"Nextpace · in development",
  footTag:"local host · network of featured pros · 2026", footPolicy:"Privacy policy",
  sugCities:"Network cities", sugAddr:"Addresses", sugBusy:"Searching addresses…", sugSoon:"Soon", sugFree:"Open", sugMast:"pros", sugExact:"Exact",
  idleMasters:"Pros in the network", idleFree:"Cities without pros", idleAllFree:"All slots open",
@@ -1027,6 +1165,19 @@ es:{
  s1n:"01 — BÚSQUEDA", s1h:"Encuentra tu dirección", s1p:"Escribe una dirección, ciudad o código postal, o toca un punto en el mapa. Los avatares son profesionales que ya promocionamos.",
  s2n:"02 — COMPROBACIÓN", s2h:"Comprueba la zona por servicio", s2p:"Elige tu servicio: si cerca no hay nadie con el mismo servicio, la zona está libre y puede ser tuya.",
  s3n:"03 — SOLICITUD", s3h:"Completa el formulario", s3p:"El formulario se abre sobre el mapa. Respondemos en dos días hábiles con las condiciones de tu zona.",
+ navProd:"Producto IA",
+ pEyebrow:"Producto IA · <b>Nextpace</b>", pTitle:"Un departamento de marketing <em>en tu bolsillo</em>",
+ pLede:"La tecnología detrás de local host. Sube una foto, recibe contenido listo con el estilo de tu marca y mira cómo van tus anuncios, todo en una app.",
+ pM1n:"01 — CONTENIDO", pM1h:"Contenido con un clic", pM1p:"Sube el estilo de tu marca una vez. Elige formato y objetivo, añade fotos o un video y recibe un carrusel, Reel o post con texto y hashtags.",
+ pChip1:"Carrusel", pChip3:"Historia", pGen:"Crear",
+ pM2n:"02 — ANUNCIOS", pM2h:"Panel de anuncios de Meta", pM2p:"Conecta tu cuenta publicitaria y ve todas las métricas en una pantalla: gasto, alcance, CTR, leads, ROAS. Descubre qué creativos funcionan.",
+ pK1:"Gasto", pK3:"Leads", pDemo:"Datos de demostración · 30 días",
+ pS1n:"01 — ESTILO", pS1h:"Configura tu marca una vez", pS1p:"Logo, colores, fuentes y ejemplos de tu trabajo. Todo lo que crees después se verá como tu marca.",
+ pS2n:"02 — FORMATO", pS2h:"Elige lo que necesitas", pS2p:"Carrusel, Reel, historia o post, y un objetivo: promoción, antes/después, nuevo servicio, reseña.",
+ pS3n:"03 — LISTO", pS3h:"Descarga y publica", pS3p:"Contenido listo con texto en minutos. Los resultados de los anuncios aparecen en el panel.",
+ pA1n:"AHORA", pA1h:"Profesionales y salones de belleza", pA1p:"Cejas, pestañas, uñas, cabello, cosmetología. Los profesionales de la red local host acceden primero.",
+ pA2n:"DESPUÉS", pA2h:"Todo negocio local", pA2p:"Fitness, clínicas, cafés, servicios: todos los que necesitan marketing sin un equipo de marketing.",
+ pCta:"Obtener acceso anticipado", pCtaNote:"Nextpace · en desarrollo",
  footTag:"local host · red de profesionales destacados · 2026", footPolicy:"Política de privacidad",
  sugCities:"Ciudades de la red", sugAddr:"Direcciones", sugBusy:"Buscando direcciones…", sugSoon:"Pronto", sugFree:"Libre", sugMast:"prof.", sugExact:"Exacta",
  idleMasters:"Profesionales en la red", idleFree:"Ciudades sin profesionales", idleAllFree:"Todas las plazas libres",
@@ -1121,6 +1272,7 @@ function applyStatic(){
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder=t(el.dataset.i18nPh));
   document.querySelectorAll('[data-i18n-aria]').forEach(el=>el.setAttribute('aria-label',t(el.dataset.i18nAria)));
   document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('on',b.dataset.lang===LANG));
+  document.getElementById('foot-policy').href='privacy.html?lang='+LANG;
   document.title=t('pageTitle');
   const md=document.querySelector('meta[name="description"]'); if(md) md.content=t('pageDesc');
   document.querySelectorAll('.chip[data-city]').forEach(b=>{
@@ -1937,6 +2089,7 @@ map.on('click',async e=>{
 });
 
 $('#cta-top').onclick=()=>openApply(current||{name:'',cityKey:null,svc:svcSel.value});
+$('#cta-prod').onclick=()=>openApply(current||{name:'',cityKey:null,svc:svcSel.value});
 $('#nav-open').onclick=e=>{e.preventDefault();qEl.value='';renderIdle();map.flyTo(HOME_VIEW.center,HOME_VIEW.zoom,{duration:1.2})};
 $('#nav-map').onclick=e=>e.preventDefault();
 window.addEventListener('resize',()=>map.invalidateSize());
